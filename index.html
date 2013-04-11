@@ -11,11 +11,26 @@
     <body>
         <script>
             var BOARD_WIDTH = 10;
-            var BOARD_HEIGHT = 20;
+            var BOARD_HEIGHT = 22;
             var board = new Array(BOARD_HEIGHT);
             for (var i = 0; i < BOARD_HEIGHT; i++) {
                 board[i] = new Array(BOARD_WIDTH);
             }
+
+            var iPiece = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [1, 1, 1, 1],
+                [0, 0, 0, 0],
+            ];
+
+            var piecePoint = [0, 0];
+            function dropBlock(board, iPiece, piecePoint) {
+                while (piecePoint[0] != BOARD_HEIGHT) {
+                    piecePoint[0]++;
+                }
+            }
+
             console.log(board);
         </script>
     </body>
