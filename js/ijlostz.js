@@ -220,9 +220,27 @@
         this.width = this.shape[0].length;
         this.y = this.shapeType.start.y;
         this.x = this.shapeType.start.x;
+        this.history = null;
+        this.save();
+    };
+
+    Tetris.Block.prototype.save = function() {
+        this.history = {
+            rotation: this.rotation,
+            y: this.y,
+            x: this.x
+        }
+    };
+
+    Tetris.Block.prototype.revert = function() {
+        this.rotation = this.history.rotation;
+        this.y = this.history.y;
+        this.x = this.history.x;
+        this.shape = this.shapeType.shape[this.rotation];
     };
 
     Tetris.Block.prototype.rotate = function(direction) {
+        this.save();
         var newRotation = this.rotation + direction;
         if (newRotation < 0) {
             newRotation = this.shapeType.shape.length + newRotation;
@@ -234,6 +252,7 @@
     };
 
     Tetris.Block.prototype.move = function(move) {
+        this.save();
         this.y += move.y;
         this.x += move.x;
     };
@@ -279,6 +298,27 @@
             }
         }
         return updatedState;
+    };
+
+    Tetris.Board.prototype.validate = function(state, block) {
+        var statey = state.length;
+        var statex = state[0].length;
+        var shape = block.shape;
+        var height = block.height;
+        var width = block.width;
+
+        for (var y = 0; y < height; ++y) {
+            for (var x = 0; x < width; ++x) {
+                var yPos = block.y + y;
+                var xPos = block.x + x;
+                if (shape[y][x] > 0) {
+                    if (yPos < 0 || xPos < 0 || yPos > statey || xPos > statex) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     };
 
     Tetris.Debug = {
