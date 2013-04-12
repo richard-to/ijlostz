@@ -4,4 +4,5 @@
 
     var canvas = document.getElementById(CANVAS_ID);
     var tetris = new Tetris.Game(EL, canvas);
+    tetris.run();
 })();
