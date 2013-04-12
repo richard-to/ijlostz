@@ -263,14 +263,17 @@
 
     Tetris.Board.prototype.update = function(state, block) {
         var updatedState = $.extend(true, [], state);
+        var statey = state.length;
+        var statex = state[0].length;
         var shape = block.shape;
         var height = block.height;
         var width = block.width;
+
         for (var y = 0; y < height; ++y) {
             for (var x = 0; x < width; ++x) {
                 var yPos = block.y + y;
                 var xPos = block.x + x;
-                if (yPos >= 0 && xPos >= 0) {
+                if (yPos >= 0 && xPos >= 0 && yPos < statey && xPos < statex) {
                     updatedState[yPos][xPos] = shape[y][x];
                 }
             }
