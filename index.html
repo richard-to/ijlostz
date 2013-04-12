@@ -32,23 +32,44 @@
             function keydown(e) {
                 if ((e.keyCode || e.which) == Tetris.Control.LEFT) {
                     block.move(Tetris.MoveType.LEFT);
-                    board.activeState = board.update(board.frozenState, block);
-                    view.paint(canvas, board, settings);
+                    if (board.validate(board.frozenState, block)) {
+                        block.save();
+                        board.activeState = board.update(board.frozenState, block);
+                        view.paint(canvas, board, settings);
+                    } else {
+                        block.revert();
+                    }
                     e.preventDefault();
                 } else if ((e.keyCode || e.which) == Tetris.Control.RIGHT) {
                     block.move(Tetris.MoveType.RIGHT);
-                    board.activeState = board.update(board.frozenState, block);
-                    view.paint(canvas, board, settings);
+                    if (board.validate(board.frozenState, block)) {
+                        block.save();
+                        board.activeState = board.update(board.frozenState, block);
+                        view.paint(canvas, board, settings);
+                    } else {
+                        block.revert();
+                    }
                     e.preventDefault();
                 } else if ((e.keyCode || e.which) == Tetris.Control.UP) {
                     block.rotate(Tetris.RotationType.RIGHT);
-                    board.activeState = board.update(board.frozenState, block);
+                    if (board.validate(board.frozenState, block)) {
+                        block.save();
+                        board.activeState = board.update(board.frozenState, block);
+                        view.paint(canvas, board, settings);
+                    } else {
+                        block.revert();
+                    }
                     view.paint(canvas, board, settings);
                     e.preventDefault();
                 } else if ((e.keyCode || e.which) == Tetris.Control.DOWN) {
                     block.move(Tetris.MoveType.SOFTDROP);
-                    board.activeState = board.update(board.frozenState, block);
-                    view.paint(canvas, board, settings);
+                    if (board.validate(board.frozenState, block)) {
+                        block.save();
+                        board.activeState = board.update(board.frozenState, block);
+                        view.paint(canvas, board, settings);
+                    } else {
+                        block.revert();
+                    }
                     e.preventDefault();
                 }
             }
