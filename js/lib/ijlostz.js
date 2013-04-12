@@ -209,7 +209,8 @@
     };
     Tetris.ShapeZ = ShapeZ;
 
-    Tetris.ShapeList = [ShapeI,ShapeJ, ShapeL, ShapeO, ShapeS, ShapeT, ShapeZ];
+    var ShapeList = [ShapeI, ShapeJ, ShapeL, ShapeO, ShapeS, ShapeT, ShapeZ];
+    Tetris.ShapeList = ShapeList;
 
     var Block = function(shapeType) {
         this.shapeType = shapeType;
@@ -366,6 +367,25 @@
     };
     Tetris.CanvasView = CanvasView;
 
+    var RandomGenerator = function(shapes) {
+        this.shapes = shapes;
+        this.bag = this.generate(this.shapes);
+    };
+
+    RandomGenerator.prototype.generate = function(shapes) {
+        return _.shuffle(shapes);
+    }
+
+    RandomGenerator.prototype.nextShape = function() {
+        if (this.bag.length == 0) {
+            this.bag = this.generate(this.shapes);
+        }
+        var shape = this.bag.pop();
+        return new shape();
+    };
+
+    Tetris.RandomGenerator = RandomGenerator;
+
     var Debug = {
         printBoardState: function(state) {
             var out = "";
@@ -382,18 +402,15 @@
     };
     Tetris.Debug = Debug;
 
-    var Game = function(el, canvas, view, settings) {
+    var Game = function(el, canvas, view, shapeBag, settings) {
         this.$el = el instanceof $ ? el : $(el);
         this.el = this.$el[0];
         this.settings = _.extend(Settings, settings);
         this.canvas = canvas;
         this.debug = Debug;
+        this.shapeBag = shapeBag || new RandomGenerator(ShapeList);
         this.view = view || CanvasView;
         this.board = new Board();
-
-        this.block = new Block(new ShapeL());
-        this.board.activeState = this.board.update(this.board.frozenState, this.block);
-        this.updateView();
 
         var self = this;
         this.keyevents = {};
@@ -422,6 +439,12 @@
         });
     };
 
+    Game.prototype.run = function() {
+        this.block = new Block(this.shapeBag.nextShape());
+        this.board.activeState = this.board.update(this.board.frozenState, this.block);
+        this.updateView();
+    };
+
     Game.prototype.handleHardDrop = function() {
         var board = this.board;
         var block = this.block.clone();
@@ -429,7 +452,7 @@
             block = board.move(block, MoveType.SOFTDROP);
         }
         board.frozenState = board.update(board.frozenState, block);
-        block = new Block(new ShapeI());
+        block = new Block(this.shapeBag.nextShape());
         board.activeState = board.update(board.frozenState, block);
         this.block = block;
         this.updateView();
@@ -442,7 +465,7 @@
         var actionResult = this.handleAction(block);
         if (!actionResult && board.isBlockFrozen(board.frozenState, block)) {
             board.frozenState = board.activeState;
-            block = new Block(new ShapeZ());
+            block = new Block(this.shapeBag.nextShape());
             board.activeState = board.update(board.frozenState, block);
             this.block = block;
             this.updateView();
