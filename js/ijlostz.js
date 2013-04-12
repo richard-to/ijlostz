@@ -12,23 +12,22 @@
         LEFT: -1,
         RIGHT: 1
     };
-
     Tetris.RotationType = RotationType;
 
     var MoveType = {
         LEFT: {y: 0, x: -1},
         RIGHT: {y: 0, x: 1},
-        DOWN: {y: 1, x: 0}
+        SOFTDROP: {y: 1, x: 0}
     };
     Tetris.MoveType = MoveType;
 
-    var Controls = {
+    var Control = {
         LEFT: 37,
         UP: 38,
         RIGHT: 39,
         DOWN: 40
     };
-    Tetris.Controls = Controls;
+    Tetris.Control = Control;
 
     var ShapeName = {
         I: "I",
@@ -216,7 +215,6 @@
         this.shapeType = shapeType;
         this.rotation = 0;
         this.name = this.shapeType.name;
-        this.color = this.shapeType.color;
         this.shape = this.shapeType.shape[this.rotation];
         this.height = this.shape.length;
         this.width = this.shape[0].length;
@@ -225,7 +223,14 @@
     };
 
     Tetris.Block.prototype.rotate = function(direction) {
-        this.rotation = (this.rotation + direction) % this.shapeType.shape.length;
+        var newRotation = this.rotation + direction;
+        if (newRotation < 0) {
+            newRotation = this.shapeType.shape.length + newRotation;
+        } else {
+            newRotation %= this.shapeType.shape.length;
+        }
+        this.rotation = newRotation;
+        this.shape = this.shapeType.shape[this.rotation];
     };
 
     Tetris.Block.prototype.move = function(move) {
