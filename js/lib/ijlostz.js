@@ -382,13 +382,13 @@
     };
     Tetris.Debug = Debug;
 
-    var Game = function(el, canvas, settings) {
+    var Game = function(el, canvas, view, settings) {
         this.$el = el instanceof $ ? el : $(el);
         this.el = this.$el[0];
         this.settings = _.extend(Settings, settings);
         this.canvas = canvas;
         this.debug = Debug;
-        this.view = CanvasView;
+        this.view = view || CanvasView;
         this.board = new Board();
 
         this.block = new Block(new ShapeL());
@@ -466,6 +466,7 @@
     Game.prototype.updateView = function() {
         this.view.paint(this.canvas, this.board, this.settings);
     };
+
     Tetris.Game = Game;
 
     window.Tetris = Tetris;
