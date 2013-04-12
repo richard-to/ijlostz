@@ -2,7 +2,7 @@ body {
     margin-top: 50px;
 }
 canvas {
-    border: 5px solid #bbb;
+    border: 1px solid #000;
     display: block;
     margin: auto;
     width:250px;
