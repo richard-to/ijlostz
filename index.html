@@ -12,7 +12,7 @@
         <script src="js/ijlostz.js"></script>
     </head>
     <body>
-        <canvas id="board" width="250" height="550"></canvas>
+        <canvas id="board" width="250" height="500"></canvas>
         <script>
 
             var CANVAS_ID = "board";
@@ -24,33 +24,37 @@
             var view = Tetris.CanvasView;
 
             var board = new Tetris.Board();
-            var block = new Tetris.Block(new Tetris.ShapeS());
-            board.activeState = board.update(board.activeState, block);
+            var block = new Tetris.Block(new Tetris.ShapeL());
+            board.activeState = board.update(board.frozenState, block);
 
             view.paint(canvas, board, settings);
 
-            /*
-            $("body").keydown(function(e){
-                if ((e.keyCode || e.which) == KEY_LEFT) {
-                    drawBoard(canvas, moveBlock(board, iPiece[rotIndex], piecePos, [0, -1]), GRID_SIZE,
-                        VISIBLE_BOARD_X_START, VISIBLE_BOARD_X_END, VISIBLE_BOARD_Y_START, VISIBLE_BOARD_Y_END);
+            function keydown(e) {
+                if ((e.keyCode || e.which) == Tetris.Control.LEFT) {
+                    block.move(Tetris.MoveType.LEFT);
+                    board.activeState = board.update(board.frozenState, block);
+                    view.paint(canvas, board, settings);
                     e.preventDefault();
-                } else if ((e.keyCode || e.which) == KEY_RIGHT) {
-                    drawBoard(canvas, moveBlock(board, iPiece[rotIndex], piecePos, [0, 1]), GRID_SIZE,
-                        VISIBLE_BOARD_X_START, VISIBLE_BOARD_X_END, VISIBLE_BOARD_Y_START, VISIBLE_BOARD_Y_END);
+                } else if ((e.keyCode || e.which) == Tetris.Control.RIGHT) {
+                    block.move(Tetris.MoveType.RIGHT);
+                    board.activeState = board.update(board.frozenState, block);
+                    view.paint(canvas, board, settings);
                     e.preventDefault();
-                } else if ((e.keyCode || e.which) == KEY_UP) {
-                    drawBoard(canvas, rotateBlock(board, iPiece, piecePos, rotIndex), GRID_SIZE,
-                        VISIBLE_BOARD_X_START, VISIBLE_BOARD_X_END, VISIBLE_BOARD_Y_START, VISIBLE_BOARD_Y_END);
-                    rotIndex = (rotIndex + 1) % iPiece.length;
+                } else if ((e.keyCode || e.which) == Tetris.Control.UP) {
+                    block.rotate(Tetris.RotationType.RIGHT);
+                    board.activeState = board.update(board.frozenState, block);
+                    view.paint(canvas, board, settings);
                     e.preventDefault();
-                } else if ((e.keyCode || e.which) == KEY_DOWN) {
-                    drawBoard(canvas, moveBlock(board, iPiece[rotIndex], piecePos, [1, 0]), GRID_SIZE,
-                        VISIBLE_BOARD_X_START, VISIBLE_BOARD_X_END, VISIBLE_BOARD_Y_START, VISIBLE_BOARD_Y_END);
+                } else if ((e.keyCode || e.which) == Tetris.Control.DOWN) {
+                    block.move(Tetris.MoveType.SOFTDROP);
+                    board.activeState = board.update(board.frozenState, block);
+                    view.paint(canvas, board, settings);
                     e.preventDefault();
                 }
-            });
-            */
+            }
+
+            $("body").keydown(keydown);
+
         </script>
     </body>
 </html>
