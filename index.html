@@ -7,75 +7,13 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="css/style.css" rel="stylesheet" />
-        <script src="js/vendor/jquery.js"></script>
-        <script src="js/vendor/underscore.js"></script>
-        <script src="js/ijlostz.js"></script>
+
     </head>
     <body>
         <canvas id="board" width="250" height="500"></canvas>
-        <script>
-
-            var CANVAS_ID = "board";
-
-            var canvas = document.getElementById(CANVAS_ID);
-
-            var debug = Tetris.Debug;
-            var settings = Tetris.Settings;
-            var view = Tetris.CanvasView;
-
-            var board = new Tetris.Board();
-            var block = new Tetris.Block(new Tetris.ShapeL());
-            board.activeState = board.update(board.frozenState, block);
-
-            view.paint(canvas, board, settings);
-
-            function keydown(e) {
-                if ((e.keyCode || e.which) == Tetris.Control.LEFT) {
-                    block.move(Tetris.MoveType.LEFT);
-                    if (board.validate(board.frozenState, block)) {
-                        block.save();
-                        board.activeState = board.update(board.frozenState, block);
-                        view.paint(canvas, board, settings);
-                    } else {
-                        block.revert();
-                    }
-                    e.preventDefault();
-                } else if ((e.keyCode || e.which) == Tetris.Control.RIGHT) {
-                    block.move(Tetris.MoveType.RIGHT);
-                    if (board.validate(board.frozenState, block)) {
-                        block.save();
-                        board.activeState = board.update(board.frozenState, block);
-                        view.paint(canvas, board, settings);
-                    } else {
-                        block.revert();
-                    }
-                    e.preventDefault();
-                } else if ((e.keyCode || e.which) == Tetris.Control.UP) {
-                    block.rotate(Tetris.RotationType.RIGHT);
-                    if (board.validate(board.frozenState, block)) {
-                        block.save();
-                        board.activeState = board.update(board.frozenState, block);
-                        view.paint(canvas, board, settings);
-                    } else {
-                        block.revert();
-                    }
-                    view.paint(canvas, board, settings);
-                    e.preventDefault();
-                } else if ((e.keyCode || e.which) == Tetris.Control.DOWN) {
-                    block.move(Tetris.MoveType.SOFTDROP);
-                    if (board.validate(board.frozenState, block)) {
-                        block.save();
-                        board.activeState = board.update(board.frozenState, block);
-                        view.paint(canvas, board, settings);
-                    } else {
-                        block.revert();
-                    }
-                    e.preventDefault();
-                }
-            }
-
-            $("body").keydown(keydown);
-
-        </script>
+        <script src="js/vendor/jquery.js"></script>
+        <script src="js/vendor/underscore.js"></script>
+        <script src="js/lib/ijlostz.js"></script>
+        <script src="js/main.js"></script>
     </body>
 </html>
