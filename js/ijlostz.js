@@ -43,6 +43,7 @@
 
     Tetris.ShapeI = function() {
         this.name = ShapeName.I;
+        this.start = {y: 0, x: 3};
         this.id = 1;
         var n = this.id;
         this.shape = [
@@ -63,6 +64,7 @@
 
     Tetris.ShapeJ = function() {
         this.name = ShapeName.J;
+        this.start = {y: 1, x: 3};
         this.id = 2;
         var n = this.id;
         this.shape = [
@@ -91,6 +93,7 @@
 
     Tetris.ShapeL = function() {
         this.name = ShapeName.L;
+        this.start = {y: 1, x: 3};
         this.id = 3;
         var n = this.id;
         this.shape = [
@@ -119,8 +122,9 @@
 
     Tetris.ShapeO = function() {
         this.name = ShapeName.O;
+        this.start = {y: 1, x: 3};
         this.id = 4;
-        var n = this.n;
+        var n = this.id;
         this.shape = [
             [
                 [0, 0, 0, 0],
@@ -133,8 +137,9 @@
 
     Tetris.ShapeS = function() {
         this.name = ShapeName.S;
+        this.start = {y: 1, x: 3};
         this.id = 5;
-        var n = this.n;
+        var n = this.id;
         this.shape = [
             [
                 [0, 0, 0],
@@ -151,8 +156,9 @@
 
     Tetris.ShapeT = function() {
         this.name = ShapeName.T;
+        this.start = {y: 1, x: 3};
         this.id = 6;
-        var n = this.n;
+        var n = this.id;
         this.shape = [
             [
                 [0, 0, 0],
@@ -179,8 +185,9 @@
 
     Tetris.ShapeZ = function() {
         this.name = ShapeName.Z;
+        this.start = {y: 1, x: 3};
         this.id = 7;
-        var n = this.n;
+        var n = this.id;
         this.shape = [
             [
                 [0, 0, 0],
@@ -213,8 +220,8 @@
         this.shape = this.shapeType.shape[this.rotation];
         this.height = this.shape.length;
         this.width = this.shape[0].length;
-        this.y = 0;
-        this.x = 3;
+        this.y = this.shapeType.start.y;
+        this.x = this.shapeType.start.x;
     };
 
     Tetris.Block.prototype.rotate = function(direction) {
@@ -251,7 +258,7 @@
 
     Tetris.Board.prototype.update = function(state, block) {
         var updatedState = $.extend(true, [], state);
-        var shape = block.shape();
+        var shape = block.shape;
         var height = block.height;
         var width = block.width;
         for (var y = 0; y < height; ++y) {
@@ -295,11 +302,13 @@
             var height = board.height;
             var width = board.width;
 
-            for (var y = rowstart; y < height; y++) {
+            for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     if (state[y][x] > 0) {
+                        var cy = (y - rowstart) * gridsize;
+                        var cx = x * gridsize;
                         context.beginPath();
-                        context.rect(x * gridsize, y * gridsize, gridsize, gridsize);
+                        context.rect(cx, cy, gridsize, gridsize);
                         context.fillStyle = colormap[state[y][x]];
                         context.fill();
                         context.stroke();
