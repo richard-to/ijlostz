@@ -219,7 +219,7 @@
     var ShapeList = [ShapeI, ShapeJ, ShapeL, ShapeO, ShapeS, ShapeT, ShapeZ];
     Tetris.ShapeList = ShapeList;
 
-    var Block = function(shapeType) {
+    var Tetromino = function(shapeType) {
         this.shapeType = shapeType;
         this.rotation = 0;
         this.name = this.shapeType.name;
@@ -230,15 +230,15 @@
         this.x = this.shapeType.start.x;
     };
 
-    Block.prototype.clone = function() {
-        var block = new Block(this.shapeType);
-        block.rotation = this.rotation;
-        block.shape = this.shape;
-        block.y = this.y;
-        block.x = this.x;
-        return block;
+    Tetromino.prototype.clone = function() {
+        var tetromino = new Tetromino(this.shapeType);
+        tetromino.rotation = this.rotation;
+        tetromino.shape = this.shape;
+        tetromino.y = this.y;
+        tetromino.x = this.x;
+        return tetromino;
     };
-    Tetris.Block = Block;
+    Tetris.Tetromino = Tetromino;
 
     var Board = function() {
         this.width = 10;
@@ -263,38 +263,38 @@
         return $.extend(true, [], state);
     };
 
-    Board.prototype.rotate = function(block, direction) {
-        var newBlock = block.clone();
-        var newRotation = newBlock.rotation + direction;
+    Board.prototype.rotate = function(tetromino, direction) {
+        var newTetromino = tetromino.clone();
+        var newRotation = newTetromino.rotation + direction;
         if (newRotation < 0) {
-            newRotation = newBlock.shapeType.shape.length + newRotation;
+            newRotation = newTetromino.shapeType.shape.length + newRotation;
         } else {
-            newRotation %= newBlock.shapeType.shape.length;
+            newRotation %= newTetromino.shapeType.shape.length;
         }
-        newBlock.rotation = newRotation;
-        newBlock.shape = newBlock.shapeType.shape[newBlock.rotation];
-        return newBlock;
+        newTetromino.rotation = newRotation;
+        newTetromino.shape = newTetromino.shapeType.shape[newTetromino.rotation];
+        return newTetromino;
     };
 
-    Board.prototype.move = function(block, move) {
-        var newBlock = block.clone();
-        newBlock.y += move.y;
-        newBlock.x += move.x;
-        return newBlock;
+    Board.prototype.move = function(tetromino, move) {
+        var newTetromino = tetromino.clone();
+        newTetromino.y += move.y;
+        newTetromino.x += move.x;
+        return newTetromino;
     };
 
-    Board.prototype.update = function(state, block) {
+    Board.prototype.update = function(state, tetromino) {
         var updatedState = $.extend(true, [], state);
         var statey = state.length;
         var statex = state[0].length;
-        var shape = block.shape;
-        var height = block.height;
-        var width = block.width;
+        var shape = tetromino.shape;
+        var height = tetromino.height;
+        var width = tetromino.width;
 
         for (var y = 0; y < height; ++y) {
             for (var x = 0; x < width; ++x) {
-                var yPos = block.y + y;
-                var xPos = block.x + x;
+                var yPos = tetromino.y + y;
+                var xPos = tetromino.x + x;
                 if (shape[y][x] > 0 && yPos >= 0 && xPos >= 0 && yPos < statey && xPos < statex) {
                     updatedState[yPos][xPos] = shape[y][x];
                 }
@@ -303,17 +303,17 @@
         return updatedState;
     };
 
-    Board.prototype.isValid = function(state, block) {
+    Board.prototype.isValid = function(state, tetromino) {
         var statey = state.length;
         var statex = state[0].length;
-        var shape = block.shape;
-        var height = block.height;
-        var width = block.width;
+        var shape = tetromino.shape;
+        var height = tetromino.height;
+        var width = tetromino.width;
 
         for (var y = 0; y < height; ++y) {
             for (var x = 0; x < width; ++x) {
-                var yPos = block.y + y;
-                var xPos = block.x + x;
+                var yPos = tetromino.y + y;
+                var xPos = tetromino.x + x;
                 if (shape[y][x] > 0 && (yPos < 0 || xPos < 0 ||
                         yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
                     return false;
@@ -323,17 +323,17 @@
         return true;
     };
 
-    Board.prototype.isBlockLocked = function(state, block) {
+    Board.prototype.isTetrominoLocked = function(state, tetromino) {
         var statey = state.length;
         var statex = state[0].length;
-        var shape = block.shape;
-        var height = block.height;
-        var width = block.width;
-        var blocky = block.y + 1;
+        var shape = tetromino.shape;
+        var height = tetromino.height;
+        var width = tetromino.width;
+        var tetrominoy = tetromino.y + 1;
         for (var y = 0; y < height; ++y) {
             for (var x = 0; x < width; ++x) {
-                var yPos = blocky + y;
-                var xPos = block.x + x;
+                var yPos = tetrominoy + y;
+                var xPos = tetromino.x + x;
                 if (shape[y][x] > 0 && (yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
                     return true;
                 }
@@ -481,13 +481,13 @@
         var self = this;
         this.keyevents = {};
         this.keyevents[Control.LEFT] = function() {
-            self.handleAction(self.board.move(self.block, MoveType.LEFT));
+            self.handleAction(self.board.move(self.tetromino, MoveType.LEFT));
         };
         this.keyevents[Control.RIGHT] = function() {
-            self.handleAction(self.board.move(self.block, MoveType.RIGHT));
+            self.handleAction(self.board.move(self.tetromino, MoveType.RIGHT));
         };
         this.keyevents[Control.UP] = function() {
-            self.handleAction(self.board.rotate(self.block, RotationType.RIGHT));
+            self.handleAction(self.board.rotate(self.tetromino, RotationType.RIGHT));
         };
         this.keyevents[Control.DOWN] = function() {
             self.handleSoftDrop();
@@ -506,8 +506,8 @@
     };
 
     Game.prototype.run = function() {
-        this.block = new Block(this.shapeBag.nextShape());
-        this.board.activeState = this.board.update(this.board.frozenState, this.block);
+        this.tetromino = new Tetromino(this.shapeBag.nextShape());
+        this.board.activeState = this.board.update(this.board.frozenState, this.tetromino);
         this.updateView();
         this.gameLoop();
     };
@@ -526,30 +526,30 @@
 
     Game.prototype.handleHardDrop = function() {
         var board = this.board;
-        var block = this.block.clone();
-        while (board.isBlockLocked(board.frozenState, block) == false) {
-            block = board.move(block, MoveType.SOFTDROP);
+        var tetromino = this.tetromino.clone();
+        while (board.isTetrominoLocked(board.frozenState, tetromino) == false) {
+            tetromino = board.move(tetromino, MoveType.SOFTDROP);
         }
-        board.frozenState = board.update(board.frozenState, block);
-        return this.handleLineLock(block);
+        board.frozenState = board.update(board.frozenState, tetromino);
+        return this.handleLineLock(tetromino);
     };
 
     Game.prototype.handleSoftDrop = function() {
         var board = this.board;
-        var block = board.move(this.block, MoveType.SOFTDROP);
-        var actionResult = this.handleAction(block);
-        if (board.isBlockLocked(board.frozenState, block)) {
+        var tetromino = board.move(this.tetromino, MoveType.SOFTDROP);
+        var actionResult = this.handleAction(tetromino);
+        if (board.isTetrominoLocked(board.frozenState, tetromino)) {
             board.frozenState = board.activeState;
-            actionResult = this.handleLineLock(block);
+            actionResult = this.handleLineLock(tetromino);
         }
         return actionResult;
     };
 
-    Game.prototype.handleAction = function(block) {
+    Game.prototype.handleAction = function(tetromino) {
         var board = this.board;
-        if (board.isValid(board.frozenState, block)) {
-            this.block = block;
-            board.activeState = board.update(board.frozenState, block);
+        if (board.isValid(board.frozenState, tetromino)) {
+            this.tetromino = tetromino;
+            board.activeState = board.update(board.frozenState, tetromino);
             this.updateView();
             return true;
         } else {
@@ -557,13 +557,13 @@
         }
     };
 
-    Game.prototype.handleLineLock = function(block) {
+    Game.prototype.handleLineLock = function(tetromino) {
         var board = this.board;
         var linesCleared = this.clearLines();
         this.updateScore(linesCleared);
-        block = new Block(this.shapeBag.nextShape());
-        board.activeState = board.update(board.frozenState, block);
-        this.block = block;
+        tetromino = new Tetromino(this.shapeBag.nextShape());
+        board.activeState = board.update(board.frozenState, tetromino);
+        this.tetromino = tetromino;
         this.updateView();
         return true;
     };
