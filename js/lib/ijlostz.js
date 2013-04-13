@@ -506,26 +506,16 @@
             block = board.move(block, MoveType.SOFTDROP);
         }
         board.frozenState = board.update(board.frozenState, block);
-        this.clearLines();
-        block = new Block(this.shapeBag.nextShape());
-        board.activeState = board.update(board.frozenState, block);
-        this.block = block;
-        this.updateView();
-        return true;
+        return this.handleLineLock(block);
     };
 
     Game.prototype.handleSoftDrop = function() {
         var board = this.board;
         var block = board.move(this.block, MoveType.SOFTDROP);
         var actionResult = this.handleAction(block);
-        if (!actionResult && board.isBlockFrozen(board.frozenState, block)) {
+        if (board.isBlockFrozen(board.frozenState, block)) {
             board.frozenState = board.activeState;
-            this.clearLines();
-            block = new Block(this.shapeBag.nextShape());
-            board.activeState = board.update(board.frozenState, block);
-            this.block = block;
-            this.updateView();
-            actionResult = true;
+            actionResult = this.handleLineLock(block);
         }
         return actionResult;
     };
@@ -542,20 +532,34 @@
         }
     };
 
+    Game.prototype.handleLineLock = function(block) {
+        var board = this.board;
+        var linesCleared = this.clearLines();
+        this.updateScore(linesCleared);
+        block = new Block(this.shapeBag.nextShape());
+        board.activeState = board.update(board.frozenState, block);
+        this.block = block;
+        this.updateView();
+        return true;
+    };
+
+    Game.prototype.updateScore = function(linesCleared) {
+        this.score += this.scoreSystem.calculate(linesCleared, this.level);
+    }
+
     Game.prototype.clearLines = function() {
         var board = this.board;
         var lines = board.findLines();
+        var numLines = 0;
         if (lines) {
             var state = board.clearLines(lines);
             board.frozenState = state;
-            var numLines = 0;
             for (var k in lines) {
                 numLines++;
             }
-            this.score += this.scoreSystem.calculate(numLines, this.level);
-            console.log(this.score);
         }
-    }
+        return numLines
+    };
 
     Game.prototype.updateView = function() {
         this.view.paint(this.canvas, this.board, this.settings);
