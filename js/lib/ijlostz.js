@@ -1,4 +1,11 @@
 (function(window, undefined) {
+
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
     var Tetris = {};
 
     var Settings = {
@@ -316,7 +323,7 @@
         return true;
     };
 
-    Board.prototype.isBlockFrozen = function(state, block) {
+    Board.prototype.isBlockLocked = function(state, block) {
         var statey = state.length;
         var statex = state[0].length;
         var shape = block.shape;
@@ -453,6 +460,8 @@
     Tetris.ScoreSystem = ScoreSystem;
 
     var Game = function(el, canvas, view, shapeBag, settings) {
+        this.MILLISECONDS = 1000;
+
         this.$el = el instanceof $ ? el : $(el);
         this.el = this.$el[0];
         this.settings = _.extend(Settings, settings);
@@ -463,6 +472,9 @@
         this.view = view || CanvasView;
         this.board = new Board();
 
+        this.fps = 60;
+        this.frameRate = this.MILLISECONDS / this.fps;
+        this.frame = 0;
         this.score = 0;
         this.level = 0;
 
@@ -497,12 +509,25 @@
         this.block = new Block(this.shapeBag.nextShape());
         this.board.activeState = this.board.update(this.board.frozenState, this.block);
         this.updateView();
+        this.gameLoop();
     };
+
+    Game.prototype.gameLoop = function () {
+        this.frame = (this.frame + 1) % this.fps;
+        if (this.frame == 48) {
+            this.handleSoftDrop();
+        }
+
+        var self = this;
+        window.setTimeout(function() {
+            self.gameLoop();
+        }, this.frameRate);
+    }
 
     Game.prototype.handleHardDrop = function() {
         var board = this.board;
         var block = this.block.clone();
-        while (board.isBlockFrozen(board.frozenState, block) == false) {
+        while (board.isBlockLocked(board.frozenState, block) == false) {
             block = board.move(block, MoveType.SOFTDROP);
         }
         board.frozenState = board.update(board.frozenState, block);
@@ -513,7 +538,7 @@
         var board = this.board;
         var block = board.move(this.block, MoveType.SOFTDROP);
         var actionResult = this.handleAction(block);
-        if (board.isBlockFrozen(board.frozenState, block)) {
+        if (board.isBlockLocked(board.frozenState, block)) {
             board.frozenState = board.activeState;
             actionResult = this.handleLineLock(block);
         }
@@ -545,7 +570,7 @@
 
     Game.prototype.updateScore = function(linesCleared) {
         this.score += this.scoreSystem.calculate(linesCleared, this.level);
-    }
+    };
 
     Game.prototype.clearLines = function() {
         var board = this.board;
