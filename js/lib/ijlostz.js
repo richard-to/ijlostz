@@ -334,6 +334,46 @@
         }
         return false;
     };
+
+    Board.prototype.findLines = function() {
+        var state = this.frozenState;
+        var height = state.length;
+        var width = state[0].length;
+        var foundLines = false;
+        var lines = {};
+        for (var y = 0; y < height; ++y) {
+            var isLine = true;;
+            for (var x = 0; x < width; ++x) {
+                if (state[y][x] == 0) {
+                    isLine = false;
+                    break;
+                }
+            }
+            if (isLine) {
+                lines[y] = true;
+                foundLines = true;
+            }
+        }
+        return (foundLines) ? lines : null;
+    }
+
+    Board.prototype.clearLines = function(lines) {
+        var frozenState = this.frozenState;
+        var state = this.init(this.height, this.width);
+        var height = state.length - 1;
+        var width = state[0].length - 1;
+        var currentHeight = height;
+        for (var y = height; y >= 0; --y) {
+            var isLine = true;
+            if (!lines[y]) {
+                state[currentHeight] = frozenState[y].slice();
+                currentHeight--;
+
+            }
+        }
+        return state;
+    }
+
     Tetris.Board = Board;
 
     var CanvasView = {
@@ -402,6 +442,16 @@
     };
     Tetris.Debug = Debug;
 
+    var ScoreSystem = function() {
+        this.lineScore = [0, 40, 100, 300, 1200];
+    };
+
+    ScoreSystem.prototype.calculate = function(numLines, level) {
+        var baseScore = this.lineScore[numLines];
+        return baseScore * (level + 1);
+    }
+    Tetris.ScoreSystem = ScoreSystem;
+
     var Game = function(el, canvas, view, shapeBag, settings) {
         this.$el = el instanceof $ ? el : $(el);
         this.el = this.$el[0];
@@ -409,8 +459,12 @@
         this.canvas = canvas;
         this.debug = Debug;
         this.shapeBag = shapeBag || new RandomGenerator(ShapeList);
+        this.scoreSystem = new ScoreSystem();
         this.view = view || CanvasView;
         this.board = new Board();
+
+        this.score = 0;
+        this.level = 0;
 
         var self = this;
         this.keyevents = {};
@@ -452,6 +506,7 @@
             block = board.move(block, MoveType.SOFTDROP);
         }
         board.frozenState = board.update(board.frozenState, block);
+        this.clearLines();
         block = new Block(this.shapeBag.nextShape());
         board.activeState = board.update(board.frozenState, block);
         this.block = block;
@@ -465,6 +520,7 @@
         var actionResult = this.handleAction(block);
         if (!actionResult && board.isBlockFrozen(board.frozenState, block)) {
             board.frozenState = board.activeState;
+            this.clearLines();
             block = new Block(this.shapeBag.nextShape());
             board.activeState = board.update(board.frozenState, block);
             this.block = block;
@@ -485,6 +541,21 @@
             return false;
         }
     };
+
+    Game.prototype.clearLines = function() {
+        var board = this.board;
+        var lines = board.findLines();
+        if (lines) {
+            var state = board.clearLines(lines);
+            board.frozenState = state;
+            var numLines = 0;
+            for (var k in lines) {
+                numLines++;
+            }
+            this.score += this.scoreSystem.calculate(numLines, this.level);
+            console.log(this.score);
+        }
+    }
 
     Game.prototype.updateView = function() {
         this.view.paint(this.canvas, this.board, this.settings);
