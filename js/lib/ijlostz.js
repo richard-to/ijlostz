@@ -453,7 +453,7 @@
     }
     Tetris.ScoreSystem = ScoreSystem;
 
-    var Game = function(el, canvas, view, shapeBag, settings) {
+    var Game = function(el, canvas, shapeBag, settings) {
         this.MILLISECONDS = 1000;
 
         this.$el = el instanceof $ ? el : $(el);
@@ -461,9 +461,9 @@
         this.settings = _.extend(Settings, settings);
         this.canvas = canvas;
         this.debug = Debug;
+        this.view = CanvasView;
         this.shapeBag = shapeBag || new RandomGenerator(ShapeList);
         this.scoreSystem = new ScoreSystem();
-        this.view = view || CanvasView;
         this.board = new Board();
 
         this.fps = 60;
