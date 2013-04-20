@@ -28,5 +28,30 @@
         var shape = this.bag.pop();
         return new shape();
     };
-    Tetris.MockGenerator = MockGenerator;
+    TetrisGA.MockGenerator = MockGenerator;
+
+    var MovePlayer = function(tetris, moves, reflexSpeed) {
+        this.tetris = tetris;
+        this.moves = moves;
+        this.reflexSpeed = reflexSpeed;
+    };
+
+    MovePlayer.prototype.play = function() {
+        this.tetris.run();
+        this.makeMove();
+    };
+
+    MovePlayer.prototype.makeMove = function() {
+        if (this.moves) {
+            this.tetris.handleKeyEvent(this.moves.pop());
+            var self = this;
+            window.setTimeout(function() {
+                this.makeMove();
+            }, this.reflexSpeed);
+        } else {
+            this.tetris.handlePauseToggle();
+        }
+    };
+    TetrisGA.MovePlayer = MovePlayer;
+
 })(window);
