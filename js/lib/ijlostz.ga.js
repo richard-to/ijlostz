@@ -9,12 +9,24 @@
     };
     TetrisGA.Settings = Settings;
 
-
     // A view object that does nothing. It is not necessary
     // to show the canvas when running the simulation.
     var NullView = function() {};
 
     // Override the paint method to do nothing.
-    // The settings object here refers to the
+    // The settings object here refers to the settings in Tetris
+    // module.
     NullView.prototype.paint = function(board, settings) {};
+    TetrisGA.NullView = NullView;
+
+    // Pass in a known sequence of shapes for testing GA.
+    var MockGenerator = function(shapeSequence) {
+        this.bag = shapeSequence;
+    };
+
+    MockGenerator.prototype.nextShape = function() {
+        var shape = this.bag.pop();
+        return new shape();
+    };
+    Tetris.MockGenerator = MockGenerator;
 })(window);
