@@ -467,7 +467,9 @@
         this.board = new Board();
 
         this.fps = 60;
+        this.gravity = 48;
         this.frameRate = this.MILLISECONDS / this.fps;
+        this.gravityFrame = 0;
         this.score = 0;
         this.level = 0;
 
@@ -506,7 +508,11 @@
     };
 
     Game.prototype.gameLoop = function () {
+        if (this.gravityFrame >= this.gravity) {
             this.handleSoftDrop();
+            this.gravityFrame = 0;
+        } else {
+            this.gravityFrame++;
         }
 
         var self = this;
