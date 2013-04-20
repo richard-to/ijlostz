@@ -468,7 +468,6 @@
 
         this.fps = 60;
         this.frameRate = this.MILLISECONDS / this.fps;
-        this.frame = 0;
         this.score = 0;
         this.level = 0;
 
@@ -507,8 +506,6 @@
     };
 
     Game.prototype.gameLoop = function () {
-        this.frame = (this.frame + 1) % this.fps;
-        if (this.frame == 48) {
             this.handleSoftDrop();
         }
 
