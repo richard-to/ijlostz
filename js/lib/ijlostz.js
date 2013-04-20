@@ -643,15 +643,24 @@
         // page arround.
         var self = this;
         this.$el.keydown(function(e) {
-            var action = self.keyevents[e.which];
-            if (_.isFunction(action) && !self.paused) {
-                action();
-                e.preventDefault();
-            } else if (e.which === Control.PAUSE) {
-                self.handlePauseToggle();
+            var validAction = self.handleKeyEvent(e.which);
+            if (validAction) {
                 e.preventDefault();
             }
         });
+    };
+
+    Game.prototype.handleKeyEvent = function(keyCode) {
+        var validAction = false;
+        var action = this.keyevents[keyCode];
+        if (_.isFunction(action) && !this.paused) {
+            action();
+        } else if (keyCode === Control.PAUSE) {
+            this.handlePauseToggle();
+        } else {
+            validAction = false;
+        }
+        return validAction;
     };
 
     // Runs the game. Start games loop and paints the inital board.
