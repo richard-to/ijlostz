@@ -638,9 +638,6 @@
         this.keyevents[Control.HARDDROP] = _.bind(this.handleHardDrop, this);
         this.keyevents[Control.PAUSE] = _.bind(this.handlePauseToggle, this);
 
-        // The key event handler. If key press exists in hash, call corresponding function
-        // and prevent default actions. This is necessary since the arrow keys can scroll the
-        // page arround.
         var self = this;
         this.$el.keydown(function(e) {
             var validAction = self.handleKeyEvent(e.which);
@@ -650,6 +647,9 @@
         });
     };
 
+// The key event handler. If key press exists in hash, call corresponding function
+    // and prevent default actions. This is necessary since the arrow keys can scroll the
+    // page arround.
     Game.prototype.handleKeyEvent = function(keyCode) {
         var validAction = true;
         var action = this.keyevents[keyCode];
