@@ -3,8 +3,9 @@
     // Main namespace for Tetris.
     var Tetris = {};
 
-    // Settings that handle the visual display for Tetris.
+    // Settings for Tetris.
     var Settings = {
+        keysEnabled: true,
         gridsize: 25,
         colormap: ["white", "cyan", "blue", "orange", "yellow", "green", "purple", "red"],
         stroke: {linewidth: 1, style: "black"},
@@ -638,13 +639,15 @@
         this.keyevents[Control.HARDDROP] = _.bind(this.handleHardDrop, this);
         this.keyevents[Control.PAUSE] = _.bind(this.handlePauseToggle, this);
 
-        var self = this;
-        this.$el.keydown(function(e) {
-            var validAction = self.handleKeyEvent(e.which);
-            if (validAction) {
-                e.preventDefault();
-            }
-        });
+        if (this.settings.keysEnabled) {
+            var self = this;
+            this.$el.keydown(function(e) {
+                var validAction = self.handleKeyEvent(e.which);
+                if (validAction) {
+                    e.preventDefault();
+                }
+            });
+        }
     };
 
 // The key event handler. If key press exists in hash, call corresponding function
