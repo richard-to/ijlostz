@@ -26,14 +26,28 @@
     };
     Tetris.MoveType = MoveType;
 
-    // Constants for key mapping of controls
+    // Constants for key mapping of controls.
+    //
+    // Default mapping:
+    //
+    // - enter: pause
+    // - left: move left
+    // - right: move right
+    // - up or x: rotate right
+    // - z: rotate left
+    // - down: soft drop
+    // - spacebar: hard drop
     var Control = {
-        SPACEBAR: 32,
+        PAUSE: 32,
         LEFT: 37,
-        UP: 38,
+        ROTATE_RIGHT_ALT: 38,
         RIGHT: 39,
-        DOWN: 40
+        SOFTDROP: 40,
+        PAUSE: 13,
+        ROTATE_RIGHT: 88,
+        ROTATE_LEFT: 90
     };
+
     Tetris.Control = Control;
 
     // Constants for tetromino names.
@@ -609,6 +623,9 @@
         // Keeps track of users level.
         this.level = 0;
 
+        // Keeps trakc of pause state.
+        this.paused = false;
+
         // Key events hash contains functions that correspond to key press
         // values.
         var self = this;
@@ -619,23 +636,35 @@
         this.keyevents[Control.RIGHT] = function() {
             self.handleAction(self.tetrominoOp.move(self.tetromino, MoveType.RIGHT));
         };
-        this.keyevents[Control.UP] = function() {
+        this.keyevents[Control.ROTATE_RIGHT_ALT] = function() {
             self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.RIGHT));
         };
-        this.keyevents[Control.DOWN] = function() {
+        this.keyevents[Control.ROTATE_RIGHT] = function() {
+            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.RIGHT));
+        };
+        this.keyevents[Control.ROTATE_LEFT] = function() {
+            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.LEFT));
+        };
+        this.keyevents[Control.SOFT_DROP] = function() {
             self.handleSoftDrop();
         };
-        this.keyevents[Control.SPACEBAR] = function() {
+        this.keyevents[Control.HARD_DROP] = function() {
             self.handleHardDrop();
+        };
+        this.keyevents[Control.PAUSE] = function() {
+            self.handlePauseToggle();
         };
 
         // The key event handler. If key press exists in hash, call corresponding function
         // and prevent default actions. This is necessary since the arrow keys can scroll the
         // page arround.
         this.$el.keydown(function(e) {
-            var action = self.keyevents[e.keycode] || self.keyevents[e.which];
-            if (_.isFunction(action)) {
+            var action = self.keyevents[e.which];
+            if (_.isFunction(action) && !self.paused) {
                 action();
+                e.preventDefault();
+            } else if (e.which === Control.PAUSE) {
+                self.handlePauseToggle();
                 e.preventDefault();
             }
         });
@@ -654,18 +683,24 @@
     // Currently the fall rate is hardcoded at every 48 frames.
     // This only applies to level 0. This rate increases with every level.
     Game.prototype.gameLoop = function () {
-        if (this.gravityFrame >= this.gravity) {
-            this.handleSoftDrop();
-            this.gravityFrame = 0;
-        } else {
-            this.gravityFrame++;
+        if (!this.paused) {
+            if (this.gravityFrame >= this.gravity) {
+                this.handleSoftDrop();
+                this.gravityFrame = 0;
+            } else {
+                this.gravityFrame++;
+            }
         }
 
         var self = this;
         window.setTimeout(function() {
             self.gameLoop();
         }, this.frameRate);
-    }
+    };
+
+    Game.prototype.handlePauseToggle = function() {
+        this.paused = this.paused ? false : true;
+    };
 
     // Event handler for Harddrop (spacebar).
     // NES version didn't have a harddrop, but it
