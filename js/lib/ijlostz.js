@@ -272,12 +272,11 @@
     //
     // Everytime a Tetromino in the active state becomes locked, the active state
     // is copied to the frozen state.
-    var Board = function() {
+    var Board = function(state) {
         this.width = 10;
         this.height = 22;
         this.rowstart = 2;
-        this.frozenState = this.init(this.height, this.width);
-        this.activeState = this.cloneState(this.frozenState);
+        this.state = state || this.init(this.height, this.width);
     };
 
     // Initializes an empty board.
@@ -295,178 +294,174 @@
         return state;
     };
 
-    // Clones the the state of the board.
-    // Useful for rollbacks
-    Board.prototype.cloneState = function(state) {
-        return $.extend(true, [], state);
+    // Clones the board.
+    Board.prototype.clone = function() {
+        var state = $.extend(true, [], this.state);
+        return new Board(state);
     };
-
-    // Rotates a copy of a Tetromino passed into the function using
-    // a direction specified in the directions constant.
-    Board.prototype.rotate = function(tetromino, direction) {
-        var newTetromino = tetromino.clone();
-        var newRotation = newTetromino.rotation + direction;
-        if (newRotation < 0) {
-            newRotation = newTetromino.shapeType.shape.length + newRotation;
-        } else {
-            newRotation %= newTetromino.shapeType.shape.length;
-        }
-        newTetromino.rotation = newRotation;
-        newTetromino.shape = newTetromino.shapeType.shape[newTetromino.rotation];
-        return newTetromino;
-    };
-
-    // Moves a copy of a Tetromino by using a move specified in the move
-    // constants above.
-    Board.prototype.move = function(tetromino, move) {
-        var newTetromino = tetromino.clone();
-        newTetromino.y += move.y;
-        newTetromino.x += move.x;
-        return newTetromino;
-    };
-
-    // Updates the clone of a state (frozen/active) with the given Tetromino's
-    // position and rotation on the board.
-    Board.prototype.update = function(state, tetromino) {
-        var updatedState = $.extend(true, [], state);
-        var statey = state.length;
-        var statex = state[0].length;
-        var shape = tetromino.shape;
-        var height = tetromino.height;
-        var width = tetromino.width;
-
-        for (var y = 0; y < height; ++y) {
-            for (var x = 0; x < width; ++x) {
-                var yPos = tetromino.y + y;
-                var xPos = tetromino.x + x;
-                if (shape[y][x] > 0 && yPos >= 0 && xPos >= 0 && yPos < statey && xPos < statex) {
-                    updatedState[yPos][xPos] = shape[y][x];
-                }
-            }
-        }
-        return updatedState;
-    };
-
-    // Checks if the Tetromino coordinates are valid given the current
-    // state.
-    Board.prototype.isValid = function(state, tetromino) {
-        var statey = state.length;
-        var statex = state[0].length;
-        var shape = tetromino.shape;
-        var height = tetromino.height;
-        var width = tetromino.width;
-
-        for (var y = 0; y < height; ++y) {
-            for (var x = 0; x < width; ++x) {
-                var yPos = tetromino.y + y;
-                var xPos = tetromino.x + x;
-                if (shape[y][x] > 0 && (yPos < 0 || xPos < 0 ||
-                        yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-
-    // Checks if the Tetromino has hit the bottom of the board or if
-    // the Tetromino has connected with another Tetromino below it.
-    Board.prototype.isTetrominoLocked = function(state, tetromino) {
-        var statey = state.length;
-        var statex = state[0].length;
-        var shape = tetromino.shape;
-        var height = tetromino.height;
-        var width = tetromino.width;
-        var tetrominoy = tetromino.y + 1;
-        for (var y = 0; y < height; ++y) {
-            for (var x = 0; x < width; ++x) {
-                var yPos = tetrominoy + y;
-                var xPos = tetromino.x + x;
-                if (shape[y][x] > 0 && (yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
-
-    // Finds all the rows that are occupied by a Tetromino.
-    // Returns null if no such lines are found. If lines are found
-    // an object is returned. The object has key values that represent
-    // the index of the row
-    Board.prototype.findLines = function() {
-        var state = this.frozenState;
-        var height = state.length;
-        var width = state[0].length;
-        var foundLines = false;
-        var lines = {};
-        for (var y = 0; y < height; ++y) {
-            var isLine = true;
-            for (var x = 0; x < width; ++x) {
-                if (state[y][x] === 0) {
-                    isLine = false;
-                    break;
-                }
-            }
-            if (isLine) {
-                lines[y] = true;
-                foundLines = true;
-            }
-        }
-        return (foundLines) ? lines : null;
-    }
-
-    // Clears completed rows from the frozen state of the board.
-    // Tetrominos are moved down accordingly.
-    Board.prototype.clearLines = function(lines) {
-        var frozenState = this.frozenState;
-        var state = this.init(this.height, this.width);
-        var height = state.length - 1;
-        var width = state[0].length - 1;
-        var currentHeight = height;
-        for (var y = height; y >= 0; --y) {
-            var isLine = true;
-            if (!lines[y]) {
-                state[currentHeight] = frozenState[y].slice();
-                currentHeight--;
-
-            }
-        }
-        return state;
-    }
     Tetris.Board = Board;
 
-    // Paints the board state on the canvas.
-    var CanvasView = {
-        paint: function(canvas, board, settings) {
-            var context = canvas.getContext("2d");
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.lineWidth = settings.stroke.linewidth;
-            context.strokeStyle = settings.stroke.style;
+    // Helper functions that manipulate tetrominos.
+    // All operations are non-destructive and will return a copy.
+    var TetrominoOp = {
+        // Rotates a copy of a Tetromino passed into the function using
+        // a direction specified in the directions constant.
+        rotate: function(tetromino, direction) {
+            var newTetromino = tetromino.clone();
+            var newRotation = newTetromino.rotation + direction;
+            if (newRotation < 0) {
+                newRotation = newTetromino.shapeType.shape.length + newRotation;
+            } else {
+                newRotation %= newTetromino.shapeType.shape.length;
+            }
+            newTetromino.rotation = newRotation;
+            newTetromino.shape = newTetromino.shapeType.shape[newTetromino.rotation];
+            return newTetromino;
+        },
+        // Moves a copy of a Tetromino by using a move specified in the move
+        // constants above.
+        move: function(tetromino, move) {
+            var newTetromino = tetromino.clone();
+            newTetromino.y += move.y;
+            newTetromino.x += move.x;
+            return newTetromino;
+        },
+        rotate: function(tetromino, direction) {
+            var newTetromino = tetromino.clone();
+            var newRotation = newTetromino.rotation + direction;
+            if (newRotation < 0) {
+                newRotation = newTetromino.shapeType.shape.length + newRotation;
+            } else {
+                newRotation %= newTetromino.shapeType.shape.length;
+            }
+            newTetromino.rotation = newRotation;
+            newTetromino.shape = newTetromino.shapeType.shape[newTetromino.rotation];
+            return newTetromino;
+        }
+    };
+    Tetris.TetrominoOp = TetrominoOp;
 
-            var gridsize = settings.gridsize;
-            var colormap = settings.colormap;
-            var state = board.activeState;
-            var rowstart = board.rowstart;
-            var height = board.height;
-            var width = board.width;
+    // Helper functions that manipulate the board state.
+    // All operations are non-destructive and will return a copy.
+    var BoardOp = {
+        // Updates board with the given Tetromino's position and rotation on the board.
+        // A copy of the board is returned.
+        update: function(board, tetromino) {
+            var newBoard = board.clone();
+            var updatedState = newBoard.state;
 
-            for (var y = 0; y < height; y++) {
-                for (var x = 0; x < width; x++) {
-                    if (state[y][x] > 0) {
-                        var cy = (y - rowstart) * gridsize;
-                        var cx = x * gridsize;
-                        context.beginPath();
-                        context.rect(cx, cy, gridsize, gridsize);
-                        context.fillStyle = colormap[state[y][x]];
-                        context.fill();
-                        context.stroke();
+            var state = board.state;
+            var statey = board.height;
+            var statex = board.width;
+
+            var shape = tetromino.shape;
+            var height = tetromino.height;
+            var width = tetromino.width;
+
+            for (var y = 0; y < height; ++y) {
+                for (var x = 0; x < width; ++x) {
+                    var yPos = tetromino.y + y;
+                    var xPos = tetromino.x + x;
+                    if (shape[y][x] > 0 && yPos >= 0 && xPos >= 0 && yPos < statey && xPos < statex) {
+                        updatedState[yPos][xPos] = shape[y][x];
                     }
                 }
             }
+
+            newBoard.state = updatedState;
+            return newBoard;
+        },
+        // Checks if the Tetromino coordinates are valid given the current
+        // state.
+        isValid: function(board, tetromino) {
+            var state = board.state;
+            var statey = board.height;
+            var statex = board.width;
+            var shape = tetromino.shape;
+            var height = tetromino.height;
+            var width = tetromino.width;
+
+            for (var y = 0; y < height; ++y) {
+                for (var x = 0; x < width; ++x) {
+                    var yPos = tetromino.y + y;
+                    var xPos = tetromino.x + x;
+                    if (shape[y][x] > 0 && (yPos < 0 || xPos < 0 ||
+                            yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        },
+        // Checks if the Tetromino has hit the bottom of the board or if
+        // the Tetromino has connected with another Tetromino below it.
+        isTetrominoLocked: function(board, tetromino) {
+            var state = board.state;
+            var statey = board.height;
+            var statex = board.width;
+            var shape = tetromino.shape;
+            var height = tetromino.height;
+            var width = tetromino.width;
+            var tetrominoy = tetromino.y + 1;
+            for (var y = 0; y < height; ++y) {
+                for (var x = 0; x < width; ++x) {
+                    var yPos = tetrominoy + y;
+                    var xPos = tetromino.x + x;
+                    if (shape[y][x] > 0 && (yPos >= statey || xPos >= statex || state[yPos][xPos] > 0)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+        // Finds all the rows that are occupied by a Tetromino.
+        // Returns null if no such lines are found. If lines are found
+        // an object is returned. The object has key values that represent
+        // the index of the row
+        findLines: function(board) {
+            var state = board.state;
+            var height = board.height;
+            var width = board.width;
+            var foundLines = false;
+            var lines = {};
+            for (var y = 0; y < height; ++y) {
+                var isLine = true;
+                for (var x = 0; x < width; ++x) {
+                    if (state[y][x] === 0) {
+                        isLine = false;
+                        break;
+                    }
+                }
+                if (isLine) {
+                    lines[y] = true;
+                    foundLines = true;
+                }
+            }
+            return (foundLines) ? lines : null;
+        },
+        // Clears completed rows from the frozen state of the board.
+        // Tetrominos are moved down accordingly.
+        clearLines: function(board, lines) {
+            var state = board.state;
+
+            var newBoard = new Board();
+            var newState = newBoard.state;
+
+            var height = board.height - 1;
+            var width = board.widthh - 1;
+            var currentHeight = height;
+            for (var y = height; y >= 0; --y) {
+                var isLine = true;
+                if (!lines[y]) {
+                    newState[currentHeight] = state[y].slice();
+                    currentHeight--;
+
+                }
+            }
+            return newBoard;
         }
     };
-    Tetris.CanvasView = CanvasView;
+    Tetris.BoardOp = BoardOp;
 
     // Generates a random sequence of Tetrominos.
     //
@@ -496,23 +491,6 @@
     };
     Tetris.RandomGenerator = RandomGenerator;
 
-    // Prints the current state of board to console.
-    var Debug = {
-        printBoardState: function(state) {
-            var out = "";
-            var height = state.length;
-            var width = state[0].length;
-            for (var y = 0; y < height; ++y) {
-                for (var x = 0; x < width; ++x) {
-                    out += state[y][x] + " ";
-                }
-                out += "\n";
-            }
-            console.log(out);
-        }
-    };
-    Tetris.Debug = Debug;
-
     // Uses the NES scoring system.
     // The linescore array contains the base point values for
     // number of rows cleared. Array index 0 means 0 rows cleared, etc.
@@ -531,6 +509,58 @@
     }
     Tetris.ScoreSystem = ScoreSystem;
 
+    // Paints the board state on the canvas.
+    var CanvasView = function(canvas) {
+        this.canvas = canvas;
+    };
+
+    CanvasView.prototype.paint = function(board, settings) {
+        var context = this.canvas.getContext("2d");
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.lineWidth = settings.stroke.linewidth;
+        context.strokeStyle = settings.stroke.style;
+
+        var gridsize = settings.gridsize;
+        var colormap = settings.colormap;
+        var state = board.state;
+        var rowstart = board.rowstart;
+        var height = board.height;
+        var width = board.width;
+
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                if (state[y][x] > 0) {
+                    var cy = (y - rowstart) * gridsize;
+                    var cx = x * gridsize;
+                    context.beginPath();
+                    context.rect(cx, cy, gridsize, gridsize);
+                    context.fillStyle = colormap[state[y][x]];
+                    context.fill();
+                    context.stroke();
+                }
+            }
+        }
+    };
+    Tetris.CanvasView = CanvasView;
+
+    // Prints the current state of board to console.
+    var Debug = {
+        printBoardState: function(board) {
+            var out = "";
+            var state = board.state;
+            var height = board.height;
+            var width = board.width;
+            for (var y = 0; y < height; ++y) {
+                for (var x = 0; x < width; ++x) {
+                    out += state[y][x] + " ";
+                }
+                out += "\n";
+            }
+            console.log(out);
+        }
+    };
+    Tetris.Debug = Debug;
+
     // Manages all the parts of the game (Tetromino, Board, canvas, key events, score, etc)
     //
     // This needs refactoring badly.
@@ -540,18 +570,20 @@
     // - The shapeBag is the Tetromino generator. See RandomGenerator class
     //   for interface if a new random generator is desired.
     // - A settings object that can override default settings.
-    var Game = function(el, canvas, shapeBag, settings) {
+    var Game = function(el, view, shapeBag, settings) {
         this.MILLISECONDS = 1000;
 
         this.$el = el instanceof $ ? el : $(el);
         this.el = this.$el[0];
         this.settings = _.extend(Settings, settings);
-        this.canvas = canvas;
         this.debug = Debug;
-        this.view = CanvasView;
+        this.view = view;
         this.shapeBag = shapeBag || new RandomGenerator(ShapeList);
         this.scoreSystem = new ScoreSystem();
-        this.board = new Board();
+        this.activeBoard = new Board();
+        this.frozenBoard = new Board();
+        this.tetrominoOp = TetrominoOp;
+        this.boardOp = BoardOp;
 
         // Tetris runs at ~60 frames per second.
         this.fps = 60;
@@ -582,13 +614,13 @@
         var self = this;
         this.keyevents = {};
         this.keyevents[Control.LEFT] = function() {
-            self.handleAction(self.board.move(self.tetromino, MoveType.LEFT));
+            self.handleAction(self.tetrominoOp.move(self.tetromino, MoveType.LEFT));
         };
         this.keyevents[Control.RIGHT] = function() {
-            self.handleAction(self.board.move(self.tetromino, MoveType.RIGHT));
+            self.handleAction(self.tetrominoOp.move(self.tetromino, MoveType.RIGHT));
         };
         this.keyevents[Control.UP] = function() {
-            self.handleAction(self.board.rotate(self.tetromino, RotationType.RIGHT));
+            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.RIGHT));
         };
         this.keyevents[Control.DOWN] = function() {
             self.handleSoftDrop();
@@ -612,7 +644,7 @@
     // Runs the game. Start games loop and paints the inital board.
     Game.prototype.run = function() {
         this.tetromino = new Tetromino(this.shapeBag.nextShape());
-        this.board.activeState = this.board.update(this.board.frozenState, this.tetromino);
+        this.activeBoard = this.boardOp.update(this.frozenBoard, this.tetromino);
         this.updateView();
         this.gameLoop();
     };
@@ -639,12 +671,11 @@
     // NES version didn't have a harddrop, but it
     // makes things go faster.
     Game.prototype.handleHardDrop = function() {
-        var board = this.board;
         var tetromino = this.tetromino.clone();
-        while (board.isTetrominoLocked(board.frozenState, tetromino) === false) {
-            tetromino = board.move(tetromino, MoveType.SOFTDROP);
+        while (this.boardOp.isTetrominoLocked(this.frozenBoard, tetromino) === false) {
+            tetromino = this.tetrominoOp.move(tetromino, MoveType.SOFTDROP);
         }
-        board.frozenState = board.update(board.frozenState, tetromino);
+        this.frozenBoard = this.boardOp.update(this.frozenBoard, tetromino);
         return this.handleLineLock(tetromino);
     };
 
@@ -653,11 +684,10 @@
     // If the tetromino hits a another tetromino or the bottom
     // of the board, it will be locked immediately.
     Game.prototype.handleSoftDrop = function() {
-        var board = this.board;
-        var tetromino = board.move(this.tetromino, MoveType.SOFTDROP);
+        var tetromino = this.tetrominoOp.move(this.tetromino, MoveType.SOFTDROP);
         var actionResult = this.handleAction(tetromino);
-        if (board.isTetrominoLocked(board.frozenState, tetromino)) {
-            board.frozenState = board.activeState;
+        if (this.boardOp.isTetrominoLocked(this.frozenBoard, tetromino)) {
+            this.frozenBoard = this.activeBoard.clone();
             actionResult = this.handleLineLock(tetromino);
         }
         return actionResult;
@@ -665,10 +695,9 @@
 
     // Handles other movements. Left, right, and rotate.
     Game.prototype.handleAction = function(tetromino) {
-        var board = this.board;
-        if (board.isValid(board.frozenState, tetromino)) {
+        if (this.boardOp.isValid(this.frozenBoard, tetromino)) {
             this.tetromino = tetromino;
-            board.activeState = board.update(board.frozenState, tetromino);
+            this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
             this.updateView();
             return true;
         } else {
@@ -680,11 +709,10 @@
     // any lines are cleared, update the score if necessary, and
     // create the next Tetromino to be dropped.
     Game.prototype.handleLineLock = function(tetromino) {
-        var board = this.board;
         var linesCleared = this.clearLines();
         this.updateScore(linesCleared);
         tetromino = new Tetromino(this.shapeBag.nextShape());
-        board.activeState = board.update(board.frozenState, tetromino);
+        this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
         this.tetromino = tetromino;
         this.updateView();
         return true;
@@ -697,12 +725,10 @@
 
     // Clears lines and updates state.
     Game.prototype.clearLines = function() {
-        var board = this.board;
-        var lines = board.findLines();
+        var lines = this.boardOp.findLines(this.frozenBoard);
         var numLines = 0;
         if (lines) {
-            var state = board.clearLines(lines);
-            board.frozenState = state;
+            this.frozenBoard = this.boardOp.clearLines(this.frozenBoard, lines);
             for (var k in lines) {
                 numLines++;
             }
@@ -712,7 +738,7 @@
 
     // Updates the graphical view.
     Game.prototype.updateView = function() {
-        this.view.paint(this.canvas, this.board, this.settings);
+        this.view.paint(this.activeBoard, this.settings);
     };
     Tetris.Game = Game;
 

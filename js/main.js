@@ -3,6 +3,6 @@
     var EL = "body";
 
     var canvas = document.getElementById(CANVAS_ID);
-    var tetris = new Tetris.Game(EL, canvas);
+    var tetris = new Tetris.Game(EL, new Tetris.CanvasView(canvas));
     tetris.run();
 })();
