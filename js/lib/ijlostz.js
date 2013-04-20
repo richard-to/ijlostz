@@ -628,36 +628,20 @@
 
         // Key events hash contains functions that correspond to key press
         // values.
-        var self = this;
         this.keyevents = {};
-        this.keyevents[Control.LEFT] = function() {
-            self.handleAction(self.tetrominoOp.move(self.tetromino, MoveType.LEFT));
-        };
-        this.keyevents[Control.RIGHT] = function() {
-            self.handleAction(self.tetrominoOp.move(self.tetromino, MoveType.RIGHT));
-        };
-        this.keyevents[Control.ROTATE_RIGHT_ALT] = function() {
-            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.RIGHT));
-        };
-        this.keyevents[Control.ROTATE_RIGHT] = function() {
-            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.RIGHT));
-        };
-        this.keyevents[Control.ROTATE_LEFT] = function() {
-            self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.LEFT));
-        };
-        this.keyevents[Control.SOFTDROP] = function() {
-            self.handleSoftDrop();
-        };
-        this.keyevents[Control.HARDDROP] = function() {
-            self.handleHardDrop();
-        };
-        this.keyevents[Control.PAUSE] = function() {
-            self.handlePauseToggle();
-        };
+        this.keyevents[Control.LEFT] =  _.bind(this.handleMoveLeft, this);
+        this.keyevents[Control.RIGHT] = _.bind(this.handleMoveRight, this);
+        this.keyevents[Control.ROTATE_RIGHT_ALT] = _.bind(this.handleRotateRight, this);
+        this.keyevents[Control.ROTATE_RIGHT] = _.bind(this.handleRotateRight, this);
+        this.keyevents[Control.ROTATE_LEFT] = _.bind(this.handleRotateLeft, this);
+        this.keyevents[Control.SOFTDROP] = _.bind(this.handleSoftDrop, this);
+        this.keyevents[Control.HARDDROP] = _.bind(this.handleHardDrop, this);
+        this.keyevents[Control.PAUSE] = _.bind(this.handlePauseToggle, this);
 
         // The key event handler. If key press exists in hash, call corresponding function
         // and prevent default actions. This is necessary since the arrow keys can scroll the
         // page arround.
+        var self = this;
         this.$el.keydown(function(e) {
             var action = self.keyevents[e.which];
             if (_.isFunction(action) && !self.paused) {
@@ -726,6 +710,22 @@
             actionResult = this.handleLineLock(tetromino);
         }
         return actionResult;
+    };
+
+    Game.prototype.handleMoveLeft = function() {
+        this.handleAction(this.tetrominoOp.move(this.tetromino, MoveType.LEFT))
+    };
+
+    Game.prototype.handleMoveRight = function() {
+        this.handleAction(this.tetrominoOp.move(this.tetromino, MoveType.RIGHT))
+    };
+
+    Game.prototype.handleRotateLeft = function() {
+        this.handleAction(this.tetrominoOp.rotate(this.tetromino, RotationType.LEFT))
+    };
+
+    Game.prototype.handleRotateRight = function() {
+        this.handleAction(this.tetrominoOp.rotate(this.tetromino, RotationType.RIGHT))
     };
 
     // Handles other movements. Left, right, and rotate.
