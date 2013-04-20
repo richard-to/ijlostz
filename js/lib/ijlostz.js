@@ -518,7 +518,7 @@
     Game.prototype.handleHardDrop = function() {
         var board = this.board;
         var tetromino = this.tetromino.clone();
-        while (board.isTetrominoLocked(board.frozenState, tetromino) == false) {
+        while (board.isTetrominoLocked(board.frozenState, tetromino) === false) {
             tetromino = board.move(tetromino, MoveType.SOFTDROP);
         }
         board.frozenState = board.update(board.frozenState, tetromino);
