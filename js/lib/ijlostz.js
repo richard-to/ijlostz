@@ -651,7 +651,7 @@
     };
 
     Game.prototype.handleKeyEvent = function(keyCode) {
-        var validAction = false;
+        var validAction = true;
         var action = this.keyevents[keyCode];
         if (_.isFunction(action) && !this.paused) {
             action();
