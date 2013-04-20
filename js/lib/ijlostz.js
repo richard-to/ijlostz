@@ -1,6 +1,6 @@
 (function(window, undefined) {
 
-    // Main namespace for Tetris GA.
+    // Main namespace for Tetris.
     var Tetris = {};
 
     // Settings that handle the visual display for Tetris.
@@ -38,7 +38,7 @@
     // - down: soft drop
     // - spacebar: hard drop
     var Control = {
-        PAUSE: 32,
+        HARDDROP: 32,
         LEFT: 37,
         ROTATE_RIGHT_ALT: 38,
         RIGHT: 39,
@@ -645,10 +645,10 @@
         this.keyevents[Control.ROTATE_LEFT] = function() {
             self.handleAction(self.tetrominoOp.rotate(self.tetromino, RotationType.LEFT));
         };
-        this.keyevents[Control.SOFT_DROP] = function() {
+        this.keyevents[Control.SOFTDROP] = function() {
             self.handleSoftDrop();
         };
-        this.keyevents[Control.HARD_DROP] = function() {
+        this.keyevents[Control.HARDDROP] = function() {
             self.handleHardDrop();
         };
         this.keyevents[Control.PAUSE] = function() {
