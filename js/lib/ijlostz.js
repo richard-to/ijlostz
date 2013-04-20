@@ -345,7 +345,7 @@
         for (var y = 0; y < height; ++y) {
             var isLine = true;;
             for (var x = 0; x < width; ++x) {
-                if (state[y][x] == 0) {
+                if (state[y][x] === 0) {
                     isLine = false;
                     break;
                 }
@@ -418,7 +418,7 @@
     }
 
     RandomGenerator.prototype.nextShape = function() {
-        if (this.bag.length == 0) {
+        if (this.bag.length === 0) {
             this.bag = this.generate(this.shapes);
         }
         var shape = this.bag.pop();
