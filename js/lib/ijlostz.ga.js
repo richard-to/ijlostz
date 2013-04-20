@@ -25,7 +25,7 @@
     };
 
     MockGenerator.prototype.nextShape = function() {
-        var shape = this.bag.pop();
+        var shape = this.bag.shift();
         return new shape();
     };
     TetrisGA.MockGenerator = MockGenerator;
@@ -42,11 +42,11 @@
     };
 
     MovePlayer.prototype.makeMove = function() {
-        if (this.moves) {
-            this.tetris.handleKeyEvent(this.moves.pop());
+        if (this.moves.length > 0) {
+            this.tetris.handleKeyEvent(this.moves.shift());
             var self = this;
             window.setTimeout(function() {
-                this.makeMove();
+                self.makeMove();
             }, this.reflexSpeed);
         } else {
             this.tetris.handlePauseToggle();
@@ -54,4 +54,5 @@
     };
     TetrisGA.MovePlayer = MovePlayer;
 
+    window.TetrisGA = TetrisGA;
 })(window);
