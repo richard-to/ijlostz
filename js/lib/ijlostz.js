@@ -72,171 +72,185 @@
     // - An array of shapes. Each element in array is a 2d matrix representing
     //   tetromino in various rotation positions.
 
-    var ShapeI = function() {
-        this.name = ShapeName.I;
-        this.start = {y: 0, x: 3};
-        this.id = 1;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [n, n, n, n],
-                [0, 0, 0, 0]
-            ],
-            [
-                [0, 0, n, 0],
-                [0, 0, n, 0],
-                [0, 0, n, 0],
-                [0, 0, n, 0]
+    var ShapeI = {
+        name: ShapeName.I,
+        start: {y: 0, x: 3},
+        id: 1,
+        shape: (function() {
+            var n = 1;
+            return [
+                [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [n, n, n, n],
+                    [0, 0, 0, 0]
+                ],
+                [
+                    [0, 0, n, 0],
+                    [0, 0, n, 0],
+                    [0, 0, n, 0],
+                    [0, 0, n, 0]
+                ]
             ]
-        ];
+        })()
     };
     Tetris.ShapeI = ShapeI;
 
-    var ShapeJ = function() {
-        this.name = ShapeName.J;
-        this.start = {y: 1, x: 3};
-        this.id = 2;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0],
-                [n, n, n],
-                [0, 0, n]
-            ],
-            [
-                [0, n, 0],
-                [0, n, 0],
-                [n, n, 0],
-            ],
-            [
-                [n, 0, 0],
-                [n, n, n],
-                [0, 0, 0]
-            ],
-            [
-                [0, n, n],
-                [0, n, 0],
-                [0, n, 0],
-            ],
-        ];
+    var ShapeJ = {
+        name: ShapeName.J,
+        start: {y: 1, x: 3},
+        id: 2,
+        shape: (function(){
+            var n = 2;
+            return [
+                [
+                    [0, 0, 0],
+                    [n, n, n],
+                    [0, 0, n]
+                ],
+                [
+                    [0, n, 0],
+                    [0, n, 0],
+                    [n, n, 0],
+                ],
+                [
+                    [n, 0, 0],
+                    [n, n, n],
+                    [0, 0, 0]
+                ],
+                [
+                    [0, n, n],
+                    [0, n, 0],
+                    [0, n, 0],
+                ],
+            ];
+        })()
     };
     Tetris.ShapeJ = ShapeJ;
 
-    var ShapeL = function() {
-        this.name = ShapeName.L;
-        this.start = {y: 1, x: 3};
-        this.id = 3;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0],
-                [n, n, n],
-                [n, 0, 0]
-            ],
-            [
-                [n, n, 0],
-                [0, n, 0],
-                [0, n, 0],
-            ],
-            [
-                [0, 0, n],
-                [n, n, n],
-                [0, 0, 0]
-            ],
-            [
-                [0, n, 0],
-                [0, n, 0],
-                [0, n, n],
-            ],
-        ];
+    var ShapeL = {
+        name: ShapeName.L,
+        start: {y: 1, x: 3},
+        id: 3,
+        shape: (function(){
+            var n = 3;
+            return [
+                [
+                    [0, 0, 0],
+                    [n, n, n],
+                    [n, 0, 0]
+                ],
+                [
+                    [n, n, 0],
+                    [0, n, 0],
+                    [0, n, 0],
+                ],
+                [
+                    [0, 0, n],
+                    [n, n, n],
+                    [0, 0, 0]
+                ],
+                [
+                    [0, n, 0],
+                    [0, n, 0],
+                    [0, n, n],
+                ],
+            ];
+        })()
     };
     Tetris.ShapeL = ShapeL;
 
-    var ShapeO = function() {
-        this.name = ShapeName.O;
-        this.start = {y: 1, x: 3};
-        this.id = 4;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0, 0],
-                [0, n, n, 0],
-                [0, n, n, 0],
-                [0, 0, 0, 0]
-            ]
-        ];
+    var ShapeO = {
+        name: ShapeName.O,
+        start: {y: 1, x: 3},
+        id: 4,
+        shape: (function(){
+            var n = 4;
+            return [
+                [
+                    [0, 0, 0, 0],
+                    [0, n, n, 0],
+                    [0, n, n, 0],
+                    [0, 0, 0, 0]
+                ]
+            ];
+        })()
     };
     Tetris.ShapeO = ShapeO;
 
-    var ShapeS = function() {
-        this.name = ShapeName.S;
-        this.start = {y: 1, x: 3};
-        this.id = 5;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0],
-                [0, n, n],
-                [n, n, 0]
-            ],
-            [
-                [0, n, 0],
-                [0, n, n],
-                [0, 0, n]
-            ]
-        ];
+    var ShapeS = {
+        name: ShapeName.S,
+        start: {y: 1, x: 3},
+        id: 5,
+        shape: (function(){
+            var n = 5;
+            return [
+                [
+                    [0, 0, 0],
+                    [0, n, n],
+                    [n, n, 0]
+                ],
+                [
+                    [0, n, 0],
+                    [0, n, n],
+                    [0, 0, n]
+                ]
+            ];
+        })()
     };
     Tetris.ShapeS = ShapeS;
 
-    var ShapeT = function() {
-        this.name = ShapeName.T;
-        this.start = {y: 1, x: 3};
-        this.id = 6;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0],
-                [n, n, n],
-                [0, n, 0]
-            ],
-            [
-                [0, n, 0],
-                [n, n, 0],
-                [0, n, 0]
-            ],
-            [
-                [0, n, 0],
-                [n, n, n],
-                [0, 0, 0]
-            ],
-            [
-                [0, n, 0],
-                [0, n, n],
-                [0, n, 0]
-            ]
-        ];
+    var ShapeT = {
+        name: ShapeName.T,
+        start: {y: 1, x: 3},
+        id: 6,
+        shape: (function(){
+            var n = 6;
+            return [
+                [
+                    [0, 0, 0],
+                    [n, n, n],
+                    [0, n, 0]
+                ],
+                [
+                    [0, n, 0],
+                    [n, n, 0],
+                    [0, n, 0]
+                ],
+                [
+                    [0, n, 0],
+                    [n, n, n],
+                    [0, 0, 0]
+                ],
+                [
+                    [0, n, 0],
+                    [0, n, n],
+                    [0, n, 0]
+                ]
+            ];
+        })()
     };
     Tetris.ShapeT = ShapeT;
 
-    var ShapeZ = function() {
-        this.name = ShapeName.Z;
-        this.start = {y: 1, x: 3};
-        this.id = 7;
-        var n = this.id;
-        this.shape = [
-            [
-                [0, 0, 0],
-                [n, n, 0],
-                [0, n, n]
-            ],
-            [
-                [0, 0, n],
-                [0, n, n],
-                [0, n, 0]
-            ]
-        ];
+    var ShapeZ = {
+        name: ShapeName.Z,
+        start: {y: 1, x: 3},
+        id: 7,
+        shape: (function(){
+            var n = 7;
+            return [
+                [
+                    [0, 0, 0],
+                    [n, n, 0],
+                    [0, n, n]
+                ],
+                [
+                    [0, 0, n],
+                    [0, n, n],
+                    [0, n, 0]
+                ]
+            ];
+        })()
     };
     Tetris.ShapeZ = ShapeZ;
 
@@ -502,7 +516,7 @@
             this.bag = this.generate(this.shapes);
         }
         var shape = this.bag.pop();
-        return new shape();
+        return shape;
     };
     Tetris.RandomGenerator = RandomGenerator;
 
