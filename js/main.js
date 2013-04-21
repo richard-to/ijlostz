@@ -7,21 +7,18 @@
     var shapes = [Tetris.ShapeS, Tetris.ShapeO, Tetris.ShapeL];
     var shapeBag = new TetrisGA.MockGenerator(shapes);
 
-    var tetris = new Tetris.Game(
-        EL, new Tetris.CanvasView(canvas), shapeBag, {keysEnabled: false});
+    var sequence = {
+        coordX: [2, 9, 0],
+        rotation: [0, 3, 1]
+    };
+    var moves = TetrisGA.GenotypeToMoveSequencer.sequence(
+        sequence, Tetris.ShapeList);
+    console.log(moves);
 
-    var Control = Tetris.Control;
-    var moves = [
-        Control.LEFT,
-        Control.LEFT,
-        Control.LEFT,
-        Control.HARDDROP,
-        Control.RIGHT,
-        Control.RIGHT,
-        Control.RIGHT,
-        Control.HARDDROP
-    ];
+    var tetris = new Tetris.Game(
+        EL, new Tetris.CanvasView(canvas), shapeBag, {keysEnabled: true});
 
     var movePlayer = new TetrisGA.MovePlayer(tetris, moves, 150);
     movePlayer.play();
+
 })();
