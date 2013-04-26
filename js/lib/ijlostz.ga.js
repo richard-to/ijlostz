@@ -145,9 +145,24 @@
     // Function that initializes a gene pool that represents
     // possible move sequences for each Tetromino.
     var initializeGenePool = function(populationSize, tetrominoCount) {
-
+        var coordRange = [0, 9];
+        var rotationRange = [0, 3];
+        var genePool = [];
+        _(populationSize).times(function(n){
+            var sequence = {
+                coordX: [],
+                rotation: []
+            };
+            _(tetrominoCount).times(function(n){
+                sequence.coordX.push(_.random(coordRange[0], coordRange[1]));
+                sequence.rotation.push(_.random(rotationRange[0], rotationRange[1]));
+            });
+            genePool.push(sequence);
+        });
+        return genePool;
     };
     TetrisGA.initializeGenePool = initializeGenePool;
+
 
     window.TetrisGA = TetrisGA;
 })(window);
