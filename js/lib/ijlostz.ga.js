@@ -24,24 +24,32 @@
         this.bag = shapeSequence;
     };
 
+    // Override nextShape method to only shift off
+    // available shapes. Once no shapes exist return
+    // a null shape.
     MockGenerator.prototype.nextShape = function() {
         var shape = this.bag.shift();
         return shape || Tetris.ShapeNull;
     };
     TetrisGA.MockGenerator = MockGenerator;
 
-    var MovePlayer = function(tetris, moves, reflexSpeed) {
+    // A Computer player that plays tetris using a specific
+    // sequence of moves at a constant speed per move.
+    var ComputerPlayer = function(tetris, moves, reflexSpeed) {
         this.tetris = tetris;
         this.moves = moves;
         this.reflexSpeed = reflexSpeed;
     };
 
-    MovePlayer.prototype.play = function() {
+    // Start playing Tetris.
+    ComputerPlayer.prototype.play = function() {
         this.tetris.run();
         this.makeMove();
     };
 
-    MovePlayer.prototype.makeMove = function() {
+    // Makes next move in the sequence of moves.
+    // Once moves run out. Pause the game.
+    ComputerPlayer.prototype.makeMove = function() {
         if (this.moves.length > 0) {
             this.tetris.handleKeyEvent(this.moves.shift());
             var self = this;
@@ -52,84 +60,94 @@
             this.tetris.handlePauseToggle();
         }
     };
-    TetrisGA.MovePlayer = MovePlayer;
+    TetrisGA.ComputerPlayer = ComputerPlayer;
 
     var Control = Tetris.Control;
-    var GenotypeToMoveSequencer = {
-        sequence: function(genotype, shapes) {
-            var moves = [];
-            var coordX = genotype.coordX;
-            var rotation = genotype.rotation;
-            var length = coordX.length;
-            for (var i = 0; i < length; i++) {
-                if (rotation[i] == 1) {
-                    moves.push(Control.ROTATE_RIGHT);
-                } else if (rotation[i] == 2) {
-                    moves.push(Control.ROTATE_RIGHT);
-                    moves.push(Control.ROTATE_RIGHT);
-                } else if (rotation[i] == 3) {
-                    moves.push(Control.ROTATE_LEFT);
-                }
-                if (coordX[i] < shapes[i].start.x) {
-                    var shapeIndex = rotation[i] % shapes[i].shape.length;
-                    var shape = shapes[i].shape[shapeIndex];
-                    var moves1 = shapes[i].start.x;
-                    while(moves1 > coordX[i]) {
-                        moves.push(Control.LEFT);
-                        moves1--;
-                    }
 
-                    var xSpace = 0;
-                    var found = false;
-                    for (var x = 0; x < shape[0].length; x++) {
-                        for (var y = 0; y < shape.length; y++) {
-                            if (shape[y][x] > 0) {
-                                xSpace = x;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found)
-                            break;
-                    }
-
-                    while (xSpace > 0) {
-                        moves.push(Control.LEFT);
-                        xSpace--;
-                    }
-                } else if (coordX[i] > shapes[i].start.x) {
-                    var shapeIndex = rotation[i] % shapes[i].shape.length;
-                    var shape = shapes[i].shape[shapeIndex];
-                    var moves1 = shapes[i].start.x;
-                    while(moves1 < coordX[i]) {
-                        moves.push(Control.RIGHT);
-                        moves1++;
-                    }
-
-                    var xSpace = 0;
-                    var found = false;
-                    for (var x = shape[0].length - 1; x >= 0; x--) {
-                        for (var y = 0; y < shape.length; y++) {
-                            if (shape[y][x] > 0) {
-                                xSpace = x;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found)
-                            break;
-                    }
-                    while (xSpace < shape[0].length - 1) {
-                        moves.push(Control.LEFT);
-                        xSpace++;
-                    }
-                }
-                moves.push(Control.HARDDROP);
+    // Function that converts genotype into a sequence of
+    // moves for the computer player.
+    //
+    // TODO: Clean up function.
+    var convertGenotypeToMoves = function(genotype. shapes) {
+        var moves = [];
+        var coordX = genotype.coordX;
+        var rotation = genotype.rotation;
+        var length = coordX.length;
+        for (var i = 0; i < length; i++) {
+            if (rotation[i] == 1) {
+                moves.push(Control.ROTATE_RIGHT);
+            } else if (rotation[i] == 2) {
+                moves.push(Control.ROTATE_RIGHT);
+                moves.push(Control.ROTATE_RIGHT);
+            } else if (rotation[i] == 3) {
+                moves.push(Control.ROTATE_LEFT);
             }
-            return moves;
+            if (coordX[i] < shapes[i].start.x) {
+                var shapeIndex = rotation[i] % shapes[i].shape.length;
+                var shape = shapes[i].shape[shapeIndex];
+                var moves1 = shapes[i].start.x;
+                while(moves1 > coordX[i]) {
+                    moves.push(Control.LEFT);
+                    moves1--;
+                }
+
+                var xSpace = 0;
+                var found = false;
+                for (var x = 0; x < shape[0].length; x++) {
+                    for (var y = 0; y < shape.length; y++) {
+                        if (shape[y][x] > 0) {
+                            xSpace = x;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found)
+                        break;
+                }
+
+                while (xSpace > 0) {
+                    moves.push(Control.LEFT);
+                    xSpace--;
+                }
+            } else if (coordX[i] > shapes[i].start.x) {
+                var shapeIndex = rotation[i] % shapes[i].shape.length;
+                var shape = shapes[i].shape[shapeIndex];
+                var moves1 = shapes[i].start.x;
+                while(moves1 < coordX[i]) {
+                    moves.push(Control.RIGHT);
+                    moves1++;
+                }
+
+                var xSpace = 0;
+                var found = false;
+                for (var x = shape[0].length - 1; x >= 0; x--) {
+                    for (var y = 0; y < shape.length; y++) {
+                        if (shape[y][x] > 0) {
+                            xSpace = x;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found)
+                        break;
+                }
+                while (xSpace < shape[0].length - 1) {
+                    moves.push(Control.LEFT);
+                    xSpace++;
+                }
+            }
+            moves.push(Control.HARDDROP);
         }
+        return moves;
     };
-    TetrisGA.GenotypeToMoveSequencer = GenotypeToMoveSequencer;
+    TetrisGA.convertGenotypeToMoves = convertGenotypeToMoves;
+
+    // Function that initializes a gene pool that represents
+    // possible move sequences for each Tetromino.
+    var initializeGenePool = function(populationSize, tetrominoCount) {
+
+    };
+    TetrisGA.initializeGenePool = initializeGenePool;
 
     window.TetrisGA = TetrisGA;
 })(window);
