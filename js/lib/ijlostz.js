@@ -72,6 +72,18 @@
     // - An array of shapes. Each element in array is a 2d matrix representing
     //   tetromino in various rotation positions.
 
+    var ShapeNull = {
+        name: null,
+        start: {y: null, x: null},
+        id: null,
+        shape: [
+            [
+                []
+            ]
+        ]
+    };
+    Tetris.ShapeNull = ShapeNull;
+
     var ShapeI = {
         name: ShapeName.I,
         start: {y: 0, x: 3},
@@ -773,9 +785,13 @@
         var linesCleared = this.clearLines();
         this.updateScore(linesCleared);
         tetromino = new Tetromino(this.shapeBag.nextShape());
-        this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
-        this.tetromino = tetromino;
-        this.updateView();
+        if (tetromino.shapeType != null) {
+            this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
+            this.tetromino = tetromino;
+            this.updateView();
+        } else {
+            this.paused = true;
+        }
         return true;
     };
 
