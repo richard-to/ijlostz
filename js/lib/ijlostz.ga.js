@@ -26,7 +26,7 @@
 
     MockGenerator.prototype.nextShape = function() {
         var shape = this.bag.shift();
-        return shape;
+        return shape || Tetris.ShapeNull;
     };
     TetrisGA.MockGenerator = MockGenerator;
 
