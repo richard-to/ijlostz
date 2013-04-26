@@ -13,12 +13,11 @@
     };
     var moves = TetrisGA.GenotypeToMoveSequencer.sequence(
         sequence, Tetris.ShapeList);
-    console.log(moves);
 
     var tetris = new Tetris.Game(
         EL, new Tetris.CanvasView(canvas), shapeBag, {keysEnabled: true});
 
-    var movePlayer = new TetrisGA.MovePlayer(tetris, moves, 150);
+    var movePlayer = new TetrisGA.MovePlayer(tetris, moves, 200);
     movePlayer.play();
 
 })();
