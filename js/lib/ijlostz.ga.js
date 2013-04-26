@@ -68,7 +68,7 @@
     // moves for the computer player.
     //
     // TODO: Clean up function.
-    var convertGenotypeToMoves = function(genotype. shapes) {
+    var convertGenotypeToMoves = function(genotype, shapes) {
         var moves = [];
         var coordX = genotype.coordX;
         var rotation = genotype.rotation;
