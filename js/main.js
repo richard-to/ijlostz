@@ -11,13 +11,12 @@
         coordX: [2, 9, 0],
         rotation: [0, 3, 1]
     };
-    var moves = TetrisGA.GenotypeToMoveSequencer.sequence(
-        sequence, Tetris.ShapeList);
+    var moves = TetrisGA.convertGenotypeToMoves(sequence, Tetris.ShapeList);
 
     var tetris = new Tetris.Game(
         EL, new Tetris.CanvasView(canvas), shapeBag, {keysEnabled: true});
 
-    var movePlayer = new TetrisGA.MovePlayer(tetris, moves, 200);
-    movePlayer.play();
+    var player = new TetrisGA.ComputerPlayer(tetris, moves, 200);
+    player.play();
 
 })();
