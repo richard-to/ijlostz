@@ -173,6 +173,23 @@
     };
     TetrisGA.initializeGenePool = initializeGenePool;
 
+    // Select parents using tournament selection.
+    // Tournament uses 2 parents only for now.
+    var tournamentSelection = function(genotypes) {
+        var parents = [];
+        while (parents.length < genotypes.length) {
+            var challenger1 = genotypes[_.random(genotypes.length - 1)];
+            var challenger2 = genotypes[_.random(genotypes.length - 1)];
+            if (challenger1.fitness > challenger2.fitness) {
+                parents.push($.extend(true, [], challenger1));
+            } else {
+                parents.push($.extend(true, [], challenger2));
+            }
+        }
+        return parents;
+    };
+    TetrisGA.tournamentSelection = tournamentSelection;
+
     // N-point crossover
     var crossoverNPoint = function(genotypes, n, pc) {
         var children = [];
