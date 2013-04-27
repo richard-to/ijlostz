@@ -163,6 +163,51 @@
     };
     TetrisGA.initializeGenePool = initializeGenePool;
 
+    // N-point crossover
+    var crossoverNPoint = function(genotypes, n, pc) {
+        var children = [];
+        var length = genotypes.length / 2;
+        var crossPoints = [];
+        for (i = 0; i < n; i++) {
+            crossPoints.push(_.random(1, 8));
+        }
+        crossPoints = _.sortBy(
+            crossPoints, function(num){ return num });
+        crossPoints = _.uniq(crossPoints);
+        for (var i = 0; i < length; i++) {
+            var index = i * 2;
+            var index2 = index + 1;
+            var p1 = $.extend(true, {}, genotypes[index]);
+            var p2 = $.extend(true, {}, genotypes[index2]);
+            if (Math.random() < pc) {
+                var cIndex = 0;
+                var swap = false;
+
+                for (var g = 0; g < p1.coordX.length; g++) {
+                    if (cIndex != null && crossPoints[cIndex] == g) {
+                        cIndex++;
+                        if (cIndex < crossPoints.length) {
+                            cIndex = null;
+                        }
+                        swap = swap === false ? true : false;
+                    }
+                    if (swap) {
+                        var tempX = p1.coordX[g];
+                        var tempRot = p1.rotation[g];
+                        p1.coordX[g] = p2.coordX[g];
+                        p1.rotation[g] = p2.rotation[g];
+                        p2.coordX[g] = tempX;
+                        p2.rotation[g] = tempRot;
+                    }
+                }
+            }
+            children.push(p1);
+            children.push(p2);
+        }
+        return children;
+    };
+    TetrisGA.crossoverNPoint = crossoverNPoint;
+
     // Mutation using random reset algorithm for integers.
     var mutationRandomReset = function(genotypes, pm) {
         var mutations = $.extend(true, [], genotypes);
