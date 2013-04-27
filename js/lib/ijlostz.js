@@ -650,8 +650,11 @@
         // Keeps track of users level.
         this.level = 0;
 
-        // Keeps trakc of pause state.
+        // Keeps track of pause state.
         this.paused = false;
+
+        // End game if true;
+        this.end = false;
 
         // Key events hash contains functions that correspond to key press
         // values.
@@ -676,7 +679,7 @@
         }
     };
 
-// The key event handler. If key press exists in hash, call corresponding function
+    // The key event handler. If key press exists in hash, call corresponding function
     // and prevent default actions. This is necessary since the arrow keys can scroll the
     // page arround.
     Game.prototype.handleKeyEvent = function(keyCode) {
@@ -715,9 +718,11 @@
         }
 
         var self = this;
-        window.setTimeout(function() {
-            self.gameLoop();
-        }, this.frameRate);
+        if (this.end === false) {
+            window.setTimeout(function() {
+                self.gameLoop();
+            }, this.frameRate);
+        }
     };
 
     Game.prototype.handlePauseToggle = function() {
@@ -790,6 +795,7 @@
             this.tetromino = tetromino;
             this.updateView();
         } else {
+            this.end = true;
             this.paused = true;
         }
         return true;
