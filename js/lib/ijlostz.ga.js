@@ -142,6 +142,16 @@
     };
     TetrisGA.convertGenotypeToMoves = convertGenotypeToMoves;
 
+    // Initializes random sequence of shapes
+    var initializeShapes = function(tetrominoCount, generator) {
+        var shapes = [];
+        _(tetrominoCount).times(function(n){
+            shapes.push(generator.nextShape());
+        });
+        return shapes;
+    };
+    TetrisGA.initializeShapes = initializeShapes;
+
     // Function that initializes a gene pool that represents
     // possible move sequences for each Tetromino.
     var initializeGenePool = function(populationSize, tetrominoCount) {
