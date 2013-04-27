@@ -163,6 +163,22 @@
     };
     TetrisGA.initializeGenePool = initializeGenePool;
 
+    // Mutation using random reset algorithm for integers.
+    var mutationRandomReset = function(genotypes, pm) {
+        var mutations = $.extend(true, [], genotypes);
+        for (var i = 0; i < genotypes.length; i++) {
+            for (var g = 0; g < genotypes[i].coordX.length; g++) {
+                if (Math.random() < pm) {
+                    mutations[i].coordX[g] = _.random(9);
+                }
+                if (Math.random() < pm) {
+                    mutations[i].rotation[g] = _.random(3);
+                }
+            }
+            return mutations;
+        }
+    };
+    TetrisGA.mutationRandomReset = mutationRandomReset;
 
     window.TetrisGA = TetrisGA;
 })(window);
