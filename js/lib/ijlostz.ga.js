@@ -256,17 +256,18 @@
 
     // Simulate Tetris and calculate fitness based on
     // score.
-    var simulateFitness = function(sequence, shapes, reflexSpeed, callback) {
+    var simulateFitness = function(genotype, shapes, reflexSpeed, callback) {
         var self = this;
-        var moves = convertGenotypeToMoves(sequence, shapes);
+        var moves = convertGenotypeToMoves(genotype, shapes);
         var shapeBag = new MockGenerator(_.clone(shapes));
         var tetris = new Tetris.Game(new NullView(), shapeBag, {keysEnabled: false});
         var player = new ComputerPlayer(tetris, moves, reflexSpeed, function(score) {
-            sequence.fitness = score;
-            callback(sequence);
+            genotype.fitness = score;
+            callback(genotype);
         });
+        player.play();
     };
-    TetrisGA.simFitness = simFitness;
+    TetrisGA.simulateFitness = simulateFitness;
 
     window.TetrisGA = TetrisGA;
 })(window);
