@@ -35,10 +35,11 @@
 
     // A Computer player that plays tetris using a specific
     // sequence of moves at a constant speed per move.
-    var ComputerPlayer = function(tetris, moves, reflexSpeed) {
+    var ComputerPlayer = function(tetris, moves, reflexSpeed, onFinish) {
         this.tetris = tetris;
         this.moves = moves;
         this.reflexSpeed = reflexSpeed;
+        this.onFinish = onFinish;
     };
 
     // Start playing Tetris.
@@ -57,7 +58,8 @@
                 self.makeMove();
             }, this.reflexSpeed);
         } else {
-            this.tetris.handlePauseToggle();
+            this.tetris.end = true;
+            this.onFinish(this.tetris.score);
         }
     };
     TetrisGA.ComputerPlayer = ComputerPlayer;
