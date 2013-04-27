@@ -134,7 +134,7 @@
                         break;
                 }
                 while (xSpace < shape[0].length - 1) {
-                    moves.push(Control.LEFT);
+                    moves.push(Control.RIGHT);
                     xSpace++;
                 }
             }
