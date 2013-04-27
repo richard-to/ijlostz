@@ -5,6 +5,7 @@
 
     // Settings for Tetris.
     var Settings = {
+        keyListenerEl: "body",
         keysEnabled: true,
         gridsize: 25,
         colormap: ["white", "cyan", "blue", "orange", "yellow", "green", "purple", "red"],
@@ -606,16 +607,13 @@
     //
     // This needs refactoring badly.
     //
-    // - el is a jQuery object or a selector string.
     // - canvas is a canvas object that represents the board.
     // - The shapeBag is the Tetromino generator. See RandomGenerator class
     //   for interface if a new random generator is desired.
     // - A settings object that can override default settings.
-    var Game = function(el, view, shapeBag, settings) {
+    var Game = function(view, shapeBag, settings) {
         this.MILLISECONDS = 1000;
 
-        this.$el = el instanceof $ ? el : $(el);
-        this.el = this.$el[0];
         this.settings = _.extend(Settings, settings);
         this.debug = Debug;
         this.view = view;
@@ -670,6 +668,9 @@
 
         if (this.settings.keysEnabled) {
             var self = this;
+            var el = this.settings.keyListenerEl;
+            this.$el = el instanceof $ ? el : $(el);
+            this.el = this.$el[0];
             this.$el.keydown(function(e) {
                 var validAction = self.handleKeyEvent(e.which);
                 if (validAction) {
@@ -719,7 +720,7 @@
 
         var self = this;
         if (this.end === false) {
-            window.setTimeout(function() {
+            setTimeout(function() {
                 self.gameLoop();
             }, this.frameRate);
         }
