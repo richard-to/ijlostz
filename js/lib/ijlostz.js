@@ -5,6 +5,7 @@
 
     // Settings for Tetris.
     var Settings = {
+        onGameEnd: null,
         keyListenerEl: "body",
         keysEnabled: true,
         gridsize: 25,
@@ -611,6 +612,13 @@
     };
     Tetris.Debug = Debug;
 
+    var GameState = {
+        RUNNING: 0,
+        PAUSED: 1,
+        END: 2
+    };
+    Tetris.GameState = GameState;
+
     // Manages all the parts of the game (Tetromino, Board, canvas, key events, score, etc)
     //
     // This needs refactoring badly.
@@ -656,11 +664,8 @@
         // Keeps track of users level.
         this.level = 0;
 
-        // Keeps track of pause state.
-        this.paused = false;
-
-        // End game if true;
-        this.end = false;
+        // Keeps track of game state.
+        this.state = GameState.RUNNING;
 
         // Key events hash contains functions that correspond to key press
         // values.
@@ -717,7 +722,7 @@
     // Currently the fall rate is hardcoded at every 48 frames.
     // This only applies to level 0. This rate increases with every level.
     Game.prototype.gameLoop = function () {
-        if (!this.paused) {
+        if (this.state === GameState.RUNNING) {
             if (this.gravityFrame >= this.gravity) {
                 this.handleSoftDrop();
                 this.gravityFrame = 0;
@@ -727,7 +732,7 @@
         }
 
         var self = this;
-        if (this.end === false) {
+        if (this.state !== GameState.END) {
             setTimeout(function() {
                 self.gameLoop();
             }, this.frameRate);
@@ -735,7 +740,13 @@
     };
 
     Game.prototype.handlePauseToggle = function() {
-        this.paused = this.paused ? false : true;
+        if (this.state === GameState.RUNNING) {
+            this.state = GameState.PAUSED;
+        } else if (this.state === GameState.PAUSED) {
+            this.state = GameState.RUNNING;
+        } else {
+            this.state = GameState.END;
+        }
     };
 
     // Event handler for Harddrop (spacebar).
@@ -799,15 +810,26 @@
         var linesCleared = this.clearLines();
         this.updateScore(linesCleared);
         tetromino = new Tetromino(this.shapeBag.nextShape());
-        if (tetromino.shapeType != null) {
+        if (tetromino.name != null) {
             this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
             this.tetromino = tetromino;
             this.updateView();
         } else {
-            this.end = true;
-            this.paused = true;
+            this.activeBoard = this.frozenBoard.clone();
+            this.updateView();
+            this.endGame();
         }
         return true;
+    };
+
+    Game.prototype.endGame = function() {
+        this.state = GameState.END;
+        if (this.settings.keysEnabled) {
+            this.$el.unbind("keydown");
+        }
+        if (this.settings.onGameEnd !== null) {
+            this.settings.onGameEnd(this.score);
+        }
     };
 
     // Updates the score.
