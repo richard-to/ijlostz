@@ -837,7 +837,9 @@
     // Updates the score.
     Game.prototype.updateScore = function(linesCleared) {
         this.score += this.scoreSystem.calculate(linesCleared, this.level);
-        this.settings.onScoreUpdated(this.score);
+        if (linesCleared > 0) {
+            this.settings.onScoreUpdated(this.score);
+        }
     };
 
     // Clears lines and updates state.
