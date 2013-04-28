@@ -4,11 +4,14 @@ importScripts('vendor/underscore.js');
 importScripts('lib/ijlostz.js');
 importScripts('lib/ijlostz.ga.js');
 
+// Simulate Tetris moves using web worker. When finished return genotype
+// with fitness value represented by final score.
 var TetrisGA = window.TetrisGA;
 self.addEventListener('message', function(e) {
+    var reflexSpeed = 150;
     var data = e.data.data;
     var postMessage = self.postMessage;
-    TetrisGA.simulateFitness(data.genotype, data.shapes, 150, function(genotype) {
+    TetrisGA.simulateFitness(data.genotype, data.shapes, reflexSpeed, function(genotype) {
         postMessage({id: e.data.id, data: genotype});
     });
 }, false);
