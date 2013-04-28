@@ -7,7 +7,9 @@
 
     // Settings for Tetris GA.
     var Settings = {
-        view: NullView
+        view: NullView,
+        maxCoordX: 10,
+        maxRotation: 4
     };
     TetrisGA.Settings = Settings;
 
@@ -68,6 +70,26 @@
         }
     };
     TetrisGA.ComputerPlayer = ComputerPlayer;
+
+    // Clones genotype
+    var cloneGenotype = function(genotype) {
+        return {
+            coordX: _.clone(genotype.coordX),
+            rotation: _.clone(genotype.rotation),
+            fitness: genotype.fitness
+        };
+    };
+    TetrisGA.cloneGenotype = cloneGenotype;
+
+    var randCoordX = function() {
+        return _.random(Settings.maxCoordX - 1);
+    };
+    TetrisGA.randCoordX = randCoordX;
+
+    var randRotation = function() {
+        return _.random(Settings.maxRotation - 1);
+    };
+    TetrisGA.randRotation = randRotation;
 
     var Control = Tetris.Control;
 
@@ -162,8 +184,6 @@
     // Function that initializes a gene pool that represents
     // possible move sequences for each Tetromino.
     var initializeGenePool = function(populationSize, tetrominoCount) {
-        var coordRange = [0, 9];
-        var rotationRange = [0, 3];
         var genePool = [];
         _(populationSize).times(function(n){
             var sequence = {
@@ -171,24 +191,14 @@
                 rotation: []
             };
             _(tetrominoCount).times(function(n){
-                sequence.coordX.push(_.random(coordRange[0], coordRange[1]));
-                sequence.rotation.push(_.random(rotationRange[0], rotationRange[1]));
+                sequence.coordX.push(randCoordX());
+                sequence.rotation.push(randRotation());
             });
             genePool.push(sequence);
         });
         return genePool;
     };
     TetrisGA.initializeGenePool = initializeGenePool;
-
-    // Clones genotype
-    var cloneGenotype = function(genotype) {
-        return {
-            coordX: _.clone(genotype.coordX),
-            rotation: _.clone(genotype.rotation),
-            fitness: genotype.fitness
-        };
-    };
-    TetrisGA.cloneGenotype = cloneGenotype;
 
     // Select parents using tournament selection.
     // Tournament uses 2 parents only for now.
@@ -261,10 +271,10 @@
         for (var i = 0; i < genotypes.length; i++) {
             for (var g = 0; g < genotypes[i].coordX.length; g++) {
                 if (Math.random() < pm) {
-                    mutations[i].coordX[g] = _.random(9);
+                    mutations[i].coordX[g] = randCoordX();
                 }
                 if (Math.random() < pm) {
-                    mutations[i].rotation[g] = _.random(3);
+                    mutations[i].rotation[g] = randRotation();
                 }
             }
             return mutations;
