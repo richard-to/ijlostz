@@ -42,11 +42,10 @@
 
     // A Computer player that plays tetris using a specific
     // sequence of moves at a constant speed per move.
-    var ComputerPlayer = function(tetris, moves, reflexSpeed, onFinish) {
+    var ComputerPlayer = function(tetris, moves, reflexSpeed) {
         this.tetris = tetris;
         this.moves = moves;
         this.reflexSpeed = reflexSpeed;
-        this.onFinish = onFinish;
     };
 
     // Start playing Tetris.
@@ -58,15 +57,12 @@
     // Makes next move in the sequence of moves.
     // Once moves run out. Pause the game.
     ComputerPlayer.prototype.makeMove = function() {
-        if (this.moves.length > 0) {
+        if (this.tetris.state === Tetris.GameState.RUNNING && this.moves.length > 0) {
             this.tetris.handleKeyEvent(this.moves.shift());
             var self = this;
             setTimeout(function() {
                 self.makeMove();
             }, this.reflexSpeed);
-        } else {
-            this.tetris.end = true;
-            this.onFinish(this.tetris.score);
         }
     };
     TetrisGA.ComputerPlayer = ComputerPlayer;
@@ -288,11 +284,18 @@
         var self = this;
         var moves = convertGenotypeToMoves(genotype, shapes);
         var shapeBag = new MockGenerator(_.clone(shapes));
-        var tetris = new Tetris.Game(new NullView(), shapeBag, {keysEnabled: false});
-        var player = new ComputerPlayer(tetris, moves, reflexSpeed, function(score) {
-            genotype.fitness = score;
-            callback(genotype);
-        });
+        var tetris = new Tetris.Game(
+            new NullView(),
+            shapeBag,
+            {
+                keysEnabled: false,
+                onGameEnd: function(score) {
+                    genotype.fitness = score;
+                    callback(genotype);
+                }
+            }
+        );
+        var player = new ComputerPlayer(tetris, moves, reflexSpeed)
         player.play();
     };
     TetrisGA.simulateFitness = simulateFitness;
