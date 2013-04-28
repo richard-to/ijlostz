@@ -797,12 +797,12 @@
     Game.prototype.handleLineLock = function(tetromino) {
         var linesCleared = this.clearLines();
         this.updateScore(linesCleared);
-        tetromino = new Tetromino(this.shapeBag.nextShape());
-        if (tetromino.name != null) {
+        try {
+            tetromino = new Tetromino(this.shapeBag.nextShape());
             this.activeBoard = this.boardOp.update(this.frozenBoard, tetromino);
             this.tetromino = tetromino;
             this.updateView();
-        } else {
+        } catch (e) {
             this.activeBoard = this.frozenBoard.clone();
             this.updateView();
             this.endGame();
