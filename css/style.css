@@ -44,6 +44,11 @@ canvas {
     font-size: 14px;
 }
 
+.results-wrap {
+    height: 395px;
+    overflow-y: scroll;
+}
+
 .clear {
     height: 0;
     margin: 0;
