@@ -754,8 +754,14 @@
         while (this.boardOp.isTetrominoLocked(this.frozenBoard, tetromino) === false) {
             tetromino = this.tetrominoOp.move(tetromino, MoveType.SOFTDROP);
         }
-        this.frozenBoard = this.boardOp.update(this.frozenBoard, tetromino);
-        return this.handleLineLock(tetromino);
+        try {
+            this.frozenBoard = this.boardOp.update(this.frozenBoard, tetromino);
+            return this.handleLineLock(tetromino);
+        } catch (e) {
+            this.score = -1;
+            this.endGame();
+        }
+
     };
 
     // Event handler for soft drop. Just drops
