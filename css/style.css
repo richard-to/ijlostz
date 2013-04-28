@@ -39,6 +39,7 @@ canvas {
     width: 115px;
 }
 
+.results-wrap,
 .help-wrap {
     font-size: 14px;
 }
