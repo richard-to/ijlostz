@@ -180,6 +180,7 @@
     };
     TetrisGA.initializeGenePool = initializeGenePool;
 
+    // Clones genotype
     var cloneGenotype = function(genotype) {
         return {
             coordX: _.clone(genotype.coordX),
@@ -188,6 +189,7 @@
         };
     };
     TetrisGA.cloneGenotype = cloneGenotype;
+
     // Select parents using tournament selection.
     // Tournament uses 2 parents only for now.
     var tournamentSelection = function(genotypes) {
