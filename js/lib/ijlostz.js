@@ -6,6 +6,7 @@
     // Settings for Tetris.
     var Settings = {
         onGameEnd: null,
+        onScoreUpdated: null,
         keyListenerEl: "body",
         keysEnabled: true,
         gridsize: 25,
@@ -836,6 +837,7 @@
     // Updates the score.
     Game.prototype.updateScore = function(linesCleared) {
         this.score += this.scoreSystem.calculate(linesCleared, this.level);
+        this.settings.onScoreUpdated(this.score);
     };
 
     // Clears lines and updates state.
