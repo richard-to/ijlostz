@@ -55,6 +55,7 @@
     var CANVAS_ID = "player-board";
 
     var canvas = document.getElementById(CANVAS_ID);
+    var canvas2 = document.getElementById("cpu-board");
 
     var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
     var shapes = TetrisGA.initializeShapes(10, randomGen);
@@ -68,6 +69,18 @@
             onScoreUpdated: onScoreUpdated
         });
     tetris.run();
+
+    var tetris2 = null;
+    function onScoreUpdated2(score) {
+        $(".cpu-game-container .score").text(score);
+        if (score > parseInt($(".cpu-game-container .best-score").text())) {
+             $(".cpu-game-container .best-score").text(score);
+        }
+    }
+
+    function onGameEnd2(score) {
+        tetris2 = null;
+    }
 
     function onScoreUpdated(score) {
         $(".player-game-container .score").text(score);
@@ -84,18 +97,50 @@
             {onGameEnd: onGameEnd});
         tetris.run();
     }
-/*
-    var workerPool = new WorkerPool("static/js/worker.js", 16);
+
+    var workerPool = new WorkerPool("static/js/worker.js", 8);
     for (var i = 0; i < genotypes.length; i++) {
         workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
     }
     var returned = 0;
     var currentGeneration = 0;
+    var bestScore = 0;
+    var sumScores = 0;
     function onJobCompleted(genotype) {
         returned++;
-        console.log(genotype.fitness);
+        if (tetris2 == null && (genotype.fitness == -1 || returned === genotypes.length)) {
+            $(".cpu-game-container .score").text(0);
+            if (genotype.fitness == -1) {
+                console.log(genotype);
+            }
+            var moves = TetrisGA.convertGenotypeToMoves(genotype, shapes);
+            var shapeBag = new TetrisGA.MockGenerator(_.clone(shapes));
+
+            tetris2 = new Tetris.Game(
+                new Tetris.CanvasView(canvas2),
+                shapeBag,
+                {
+                    keysEnabled: false,
+                    onGameEnd: onGameEnd2,
+                    onScoreUpdated: onScoreUpdated2
+                });
+            var player = new TetrisGA.ComputerPlayer(tetris2, moves, 150)
+            player.play();
+        }
+
+        sumScores += genotype.fitness;
+        if (genotype.fitness >= bestScore) {
+            bestScore = genotype.fitness;
+        }
+
         if (returned === genotypes.length) {
+            var avgScore = sumScores / 50;
+            var li = $("<li>");
+            li.text(bestScore + " (" + avgScore.toFixed(2) + ")");
+            $(".results-list").append(li);
             returned = 0;
+            bestScore = 0;
+            sumScores = 0;
             currentGeneration++;
             console.log("Generation: " + currentGeneration);
             if (currentGeneration < 500) {
@@ -112,5 +157,4 @@
             }
         }
     }
-*/
 })();
