@@ -10,7 +10,65 @@
 
     </head>
     <body>
-        <canvas id="board" width="250" height="500"></canvas>
+        <div class="player-game-container game-container">
+            <div class="info-container">
+                <div class="score-wrap info-wrap">
+                    <div class="row">
+                        <span class="label">Current:</span>
+                        <span class="current-score">0</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Best:</span>
+                        <span class="best-score">0</span>
+                    </div>
+                </div>
+                <br />
+                <div class="help-wrap info-wrap">
+                    <h2>Controls</h2>
+                    <div class="row">
+                        <span class="label">Left:</span> Move left
+                    </div>
+                    <div class="row">
+                        <span class="label">Right:</span> Move right
+                    </div>
+                    <div class="row">
+                        <span class="label">Down:</span> Soft drop
+                    </div>
+                    <div class="row">
+                        <span class="label">Up:</span> Rotate right
+                    </div>
+                    <div class="row">
+                        <span class="label">X:</span> Rotate right
+                    </div>
+                    <div class="row">
+                        <span class="label">Z:</span> Rotate left
+                    </div>
+                    <div class="row">
+                        <span class="label">Spacebar:</span> Hard drop
+                    </div>
+                    <div class="row">
+                        <span class="label">Enter:</span> Pause
+                    </div>
+                </div>
+            </div>
+            <canvas id="player-board" width="250" height="500"></canvas>
+        </div>
+
+        <div class="cpu-game-container game-container">
+            <div class="info-container">
+                <div class="score-wrap info-wrap">
+                    <div class="row">
+                        <span class="label">Current:</span>
+                        <span class="current-score">0</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Best:</span>
+                        <span class="best-score">0</span>
+                    </div>
+                </div>
+            </div>
+            <canvas id="cpu-board" width="250" height="500"></canvas>
+        </div>
 
         <script src="/static/js/vendor/jquery.js"></script>
         <script src="/static/js/vendor/underscore.js"></script>
