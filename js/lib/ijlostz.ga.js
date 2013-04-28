@@ -31,7 +31,10 @@
     // a null shape.
     MockGenerator.prototype.nextShape = function() {
         var shape = this.bag.shift();
-        return shape || Tetris.ShapeNull;
+        if (shape == null) {
+            throw new Error();
+        }
+        return shape;
     };
     TetrisGA.MockGenerator = MockGenerator;
 
