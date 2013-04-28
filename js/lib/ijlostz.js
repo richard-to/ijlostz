@@ -402,7 +402,11 @@
                     var yPos = tetromino.y + y;
                     var xPos = tetromino.x + x;
                     if (shape[y][x] > 0 && yPos >= 0 && xPos >= 0 && yPos < statey && xPos < statex) {
-                        updatedState[yPos][xPos] = shape[y][x];
+                        if (updatedState[yPos][xPos] > 0) {
+                            throw new Error();
+                        } else {
+                            updatedState[yPos][xPos] = shape[y][x];
+                        }
                     }
                 }
             }
