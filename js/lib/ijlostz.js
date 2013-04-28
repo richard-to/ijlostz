@@ -604,6 +604,7 @@
     };
     Tetris.Debug = Debug;
 
+    // Game state enum
     var GameState = {
         RUNNING: 0,
         PAUSED: 1,
@@ -814,6 +815,11 @@
         return true;
     };
 
+    // Handles end game situation.
+    //
+    // - Change game state to END
+    // - Unbind key listener if keys enabled
+    // - Call end game callback if given
     Game.prototype.endGame = function() {
         this.state = GameState.END;
         if (this.settings.keysEnabled) {
