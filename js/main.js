@@ -1,39 +1,90 @@
 (function() {
+
+    var WorkerPool = function(script, numWorkers) {
+        var event = "message";
+        var numWorkers = numWorkers;
+        var tasks = [];
+        var pool = [];
+        var pending = {};
+        var workers = {};
+
+        var runJob = function(data, callback) {
+            if (pool.length > 0) {
+                var workerMeta = pool.shift();
+                var id = workerMeta.id;
+                var worker = workerMeta.worker;
+                worker.postMessage({id: id, data: data});
+                pending[id] = callback;
+            } else {
+                tasks.push({data: data, callback: callback});
+            }
+        };
+        this.runJob = runJob;
+
+        for (var i = 0; i < numWorkers; i++) {
+            var worker = new Worker(script);
+            worker.addEventListener(event, function(msg) {
+                var id = msg.data.id;
+                var data = msg.data.data;
+                var callback = pending[id];
+
+                pending[id] = null;
+                delete pending[id];
+
+                pool.push({id: id, worker: workers[id]});
+
+                if (tasks.length > 0) {
+                    var task = tasks.shift();
+                    runJob(task.data, task.callback);
+                }
+
+                callback(data);
+            }, false);
+            workers[i] = worker;
+            pool.push({id: i, worker: worker});
+        }
+
+        this.terminateAll = function() {
+            for (id in worker) {
+                worker[id].terminate();
+                delete worker[id];
+            }
+        }
+    };
+
     var CANVAS_ID = "board";
-    var EL = "body";
 
     var canvas = document.getElementById(CANVAS_ID);
 
     var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
     var shapes = TetrisGA.initializeShapes(10, randomGen);
+    var genotypes = TetrisGA.initializeGenePool(6, shapes.length);
 
-    var sequence = TetrisGA.initializeGenePool(6, shapes.length);
-
-    window.simulate = simulate;
-    window.simulate(sequence, 0, shapes);
-
-    var generations = 4;
-    var current = 0;
-    function simulate(sequence, index, shapes) {
-        var moves = TetrisGA.convertGenotypeToMoves(sequence[index], shapes);
-        var shapeBag = new TetrisGA.MockGenerator(_.clone(shapes));
-        var tetris = new Tetris.Game(
-            EL, new TetrisGA.CanvasView(canvas), shapeBag, {keysEnabled: false});
-        var self = this;
-        var player = new TetrisGA.ComputerPlayer(tetris, moves, 200, function(score) {
-            sequence[index].fitness = score;
-            index++;
-            if (index < sequence.length) {
-                self.simulate(sequence, index, shapes);
-            } else {
-                var parents = TetrisGA.tournamentSelection(sequence);
+    var workerPool = new WorkerPool("static/js/worker.js", 4);
+    for (var i = 0; i < genotypes.length; i++) {
+        workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
+    }
+    var returned = 0;
+    var currentGeneration = 0;
+    function onJobCompleted(genotype) {
+        returned++;
+        console.log(genotype.fitness);
+        if (returned === genotypes.length) {
+            returned = 0;
+            currentGeneration++;
+            console.log("Generation: " + currentGeneration);
+            if (currentGeneration < 4) {
+                var parents = TetrisGA.tournamentSelection(genotypes);
                 var children = TetrisGA.crossoverNPoint(parents, 2, .9);
                 var mutations = TetrisGA.mutationRandomReset(children, 0.1);
-                current++;
-                if (current < 4)
-                    self.simulate(sequence, 0, shapes);
+                genotypes = mutations;
+                for (var i = 0; i < genotypes.length; i++) {
+                    workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
+
+                }
+            } else {
+                workerPool.terminateAll();
             }
-        });
-        player.play();
+        }
     }
 })();
