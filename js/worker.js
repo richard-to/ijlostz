@@ -8,10 +8,9 @@ importScripts('lib/ijlostz.ga.js');
 // with fitness value represented by final score.
 var TetrisGA = window.TetrisGA;
 self.addEventListener('message', function(e) {
-    var reflexSpeed = 150;
     var data = e.data.data;
     var postMessage = self.postMessage;
-    TetrisGA.simulateFitness(data.genotype, data.shapes, reflexSpeed, function(genotype) {
+    TetrisGA.simulateFitness(data.genotype, data.shapes, null, function(genotype) {
         postMessage({id: e.data.id, data: genotype});
     });
 }, false);
