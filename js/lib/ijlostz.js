@@ -10,7 +10,7 @@
         keysEnabled: true,
         gridsize: 25,
         colormap: ["white", "cyan", "blue", "orange", "yellow", "green", "purple", "red"],
-        stroke: {linewidth: 1, style: "black"},
+        stroke: {enabled: false, linewidth: 1, style: "black"},
     };
     Tetris.Settings = Settings;
 
@@ -563,6 +563,7 @@
         context.lineWidth = settings.stroke.linewidth;
         context.strokeStyle = settings.stroke.style;
 
+        var strokeEnabled = settings.stroke.enabled;
         var gridsize = settings.gridsize;
         var colormap = settings.colormap;
         var state = board.state;
@@ -579,7 +580,9 @@
                     context.rect(cx, cy, gridsize, gridsize);
                     context.fillStyle = colormap[state[y][x]];
                     context.fill();
-                    context.stroke();
+                    if (strokeEnabled) {
+                        context.stroke();
+                    }
                 }
             }
         }
