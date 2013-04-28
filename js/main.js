@@ -105,35 +105,37 @@
     var returned = 0;
     var currentGeneration = 0;
     var bestScore = 0;
+    var bestGenotype = null;
     var sumScores = 0;
     function onJobCompleted(genotype) {
         returned++;
-        if (tetris2 == null && (genotype.fitness == -1 || returned === genotypes.length)) {
-            $(".cpu-game-container .score").text(0);
-            if (genotype.fitness == -1) {
-                console.log(genotype);
-            }
-            var moves = TetrisGA.convertGenotypeToMoves(genotype, shapes);
-            var shapeBag = new TetrisGA.MockGenerator(_.clone(shapes));
-
-            tetris2 = new Tetris.Game(
-                new Tetris.CanvasView(canvas2),
-                shapeBag,
-                {
-                    keysEnabled: false,
-                    onGameEnd: onGameEnd2,
-                    onScoreUpdated: onScoreUpdated2
-                });
-            var player = new TetrisGA.ComputerPlayer(tetris2, moves, 150)
-            player.play();
-        }
 
         sumScores += genotype.fitness;
         if (genotype.fitness >= bestScore) {
             bestScore = genotype.fitness;
+            bestGenotype = TetrisGA.cloneGenotype(genotype);
         }
 
         if (returned === genotypes.length) {
+
+            if (tetris2 == null) {
+                $(".cpu-game-container .score").text(0);
+
+                var moves2 = TetrisGA.convertGenotypeToMoves(bestGenotype, shapes);
+                var shapeBag2 = new TetrisGA.MockGenerator(_.clone(shapes));
+
+                tetris2 = new Tetris.Game(
+                    new Tetris.CanvasView(canvas2),
+                    shapeBag2,
+                    {
+                        keysEnabled: false,
+                        onGameEnd: onGameEnd2,
+                        onScoreUpdated: onScoreUpdated2
+                    });
+                var player = new TetrisGA.ComputerPlayer(tetris2, moves2, null)
+                player.play();
+            }
+
             var avgScore = sumScores / 50;
             var li = $("<li>");
             li.text(bestScore + " (" + avgScore.toFixed(2) + ")");
@@ -142,8 +144,7 @@
             bestScore = 0;
             sumScores = 0;
             currentGeneration++;
-            console.log("Generation: " + currentGeneration);
-            if (currentGeneration < 500) {
+            if (currentGeneration < 50) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
                 var children = TetrisGA.crossoverNPoint(parents, 2, .9);
                 var mutations = TetrisGA.mutationRandomReset(children, 0.1);
