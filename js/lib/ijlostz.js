@@ -74,18 +74,6 @@
     // - An array of shapes. Each element in array is a 2d matrix representing
     //   tetromino in various rotation positions.
 
-    var ShapeNull = {
-        name: null,
-        start: {y: null, x: null},
-        id: null,
-        shape: [
-            [
-                []
-            ]
-        ]
-    };
-    Tetris.ShapeNull = ShapeNull;
-
     var ShapeI = {
         name: ShapeName.I,
         start: {y: 0, x: 3},
