@@ -755,14 +755,8 @@
         while (this.boardOp.isTetrominoLocked(this.frozenBoard, tetromino) === false) {
             tetromino = this.tetrominoOp.move(tetromino, MoveType.SOFTDROP);
         }
-        try {
-            this.frozenBoard = this.boardOp.update(this.frozenBoard, tetromino);
-            return this.handleLineLock(tetromino);
-        } catch (e) {
-            this.score = -1;
-            this.endGame();
-        }
-
+        this.frozenBoard = this.boardOp.update(this.frozenBoard, tetromino);
+        return this.handleLineLock(tetromino);
     };
 
     // Event handler for soft drop. Just drops
@@ -844,7 +838,7 @@
     // Updates the score.
     Game.prototype.updateScore = function(linesCleared) {
         this.score += this.scoreSystem.calculate(linesCleared, this.level);
-        if (linesCleared > 0) {
+        if (linesCleared > 0 && this.settings.onScoreUpdated != null) {
             this.settings.onScoreUpdated(this.score);
         }
     };
