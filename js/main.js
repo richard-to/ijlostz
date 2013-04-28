@@ -63,11 +63,21 @@
     var tetris = new Tetris.Game(
         new Tetris.CanvasView(canvas),
         new TetrisGA.MockGenerator(_.clone(shapes)),
-        {onGameEnd: onGameEnd});
+        {
+            onGameEnd: onGameEnd,
+            onScoreUpdated: onScoreUpdated
+        });
     tetris.run();
 
+    function onScoreUpdated(score) {
+        $(".player-game-container .score").text(score);
+        if (score > parseInt($(".player-game-container .best-score").text())) {
+             $(".player-game-container .best-score").text(score);
+        }
+    }
+
     function onGameEnd(score) {
-        console.log(score);
+        $(".player-game-container .score").text(0);
         tetris = new Tetris.Game(
             new Tetris.CanvasView(canvas),
             new TetrisGA.MockGenerator(_.clone(shapes)),
