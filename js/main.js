@@ -52,15 +52,30 @@
         }
     };
 
-    var CANVAS_ID = "board";
+    var CANVAS_ID = "player-board";
 
     var canvas = document.getElementById(CANVAS_ID);
 
     var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
     var shapes = TetrisGA.initializeShapes(10, randomGen);
-    var genotypes = TetrisGA.initializeGenePool(6, shapes.length);
+    var genotypes = TetrisGA.initializeGenePool(50, shapes.length);
 
-    var workerPool = new WorkerPool("static/js/worker.js", 4);
+    var tetris = new Tetris.Game(
+        new Tetris.CanvasView(canvas),
+        new TetrisGA.MockGenerator(_.clone(shapes)),
+        {onGameEnd: onGameEnd});
+    tetris.run();
+
+    function onGameEnd(score) {
+        console.log(score);
+        tetris = new Tetris.Game(
+            new Tetris.CanvasView(canvas),
+            new TetrisGA.MockGenerator(_.clone(shapes)),
+            {onGameEnd: onGameEnd});
+        tetris.run();
+    }
+/*
+    var workerPool = new WorkerPool("static/js/worker.js", 16);
     for (var i = 0; i < genotypes.length; i++) {
         workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
     }
@@ -73,7 +88,7 @@
             returned = 0;
             currentGeneration++;
             console.log("Generation: " + currentGeneration);
-            if (currentGeneration < 4) {
+            if (currentGeneration < 500) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
                 var children = TetrisGA.crossoverNPoint(parents, 2, .9);
                 var mutations = TetrisGA.mutationRandomReset(children, 0.1);
@@ -87,4 +102,5 @@
             }
         }
     }
+*/
 })();
