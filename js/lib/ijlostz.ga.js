@@ -284,6 +284,27 @@
     };
     TetrisGA.ComputerPlayer = ComputerPlayer;
 
+    // Calculate fitness
+    //
+    // Lower stack height is better. Max score 22.
+    // Higher score is better.
+    var calculateFitness = function(tetris, score) {
+        var state = tetris.frozenBoard.state;
+        var height = tetris.frozenBoard.height;
+        var width = tetris.frozenBoard.width;
+        for (var y = 0; y < height; ++y) {
+            var isLine = true;
+            for (var x = 0; x < width; ++x) {
+                if (state[y][x] !== 0) {
+                    return y + score;
+                    break;
+                }
+            }
+        }
+        return score;
+    }
+    TetrisGA.calculateFitness = calculateFitness;
+
     // Simulate Tetris and calculate fitness based on
     // score.
     var simulateFitness = function(genotype, shapes, reflexSpeed, callback) {
@@ -296,7 +317,7 @@
             {
                 keysEnabled: false,
                 onGameEnd: function(score) {
-                    genotype.fitness = score;
+                    genotype.fitness = calculateFitness(tetris, score);
                     callback(genotype);
                 }
             }
