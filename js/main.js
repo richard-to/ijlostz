@@ -45,9 +45,9 @@
         }
 
         this.terminateAll = function() {
-            for (id in worker) {
-                worker[id].terminate();
-                delete worker[id];
+            for (id in workers) {
+                workers[id].terminate();
+                delete workers[id];
             }
         }
     };
