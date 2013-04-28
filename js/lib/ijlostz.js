@@ -338,7 +338,15 @@
 
     // Clones the board.
     Board.prototype.clone = function() {
-        var state = $.extend(true, [], this.state);
+        var height = this.state.length;
+        var width = this.state[0].length;
+        var state = new Array(height);
+        for (var y = 0; y < height; y++) {
+            state[y] = new Array(width);
+            for (var x = 0; x < width; x++) {
+                state[y][x] = this.state[y][x];
+            }
+        }
         return new Board(state);
     };
     Tetris.Board = Board;
