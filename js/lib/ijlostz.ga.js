@@ -40,33 +40,6 @@
     };
     TetrisGA.MockGenerator = MockGenerator;
 
-    // A Computer player that plays tetris using a specific
-    // sequence of moves at a constant speed per move.
-    var ComputerPlayer = function(tetris, moves, reflexSpeed) {
-        this.tetris = tetris;
-        this.moves = moves;
-        this.reflexSpeed = reflexSpeed;
-    };
-
-    // Start playing Tetris.
-    ComputerPlayer.prototype.play = function() {
-        this.tetris.run();
-        this.makeMove();
-    };
-
-    // Makes next move in the sequence of moves.
-    // Once moves run out. Pause the game.
-    ComputerPlayer.prototype.makeMove = function() {
-        if (this.tetris.state === Tetris.GameState.RUNNING && this.moves.length > 0) {
-            this.tetris.handleKeyEvent(this.moves.shift());
-            var self = this;
-            setTimeout(function() {
-                self.makeMove();
-            }, this.reflexSpeed);
-        }
-    };
-    TetrisGA.ComputerPlayer = ComputerPlayer;
-
     // Clones genotype
     var cloneGenotype = function(genotype) {
         return {
@@ -277,6 +250,39 @@
         }
     };
     TetrisGA.mutationRandomReset = mutationRandomReset;
+
+
+    // A Computer player that plays tetris using a specific
+    // sequence of moves at a constant speed per move.
+    var ComputerPlayer = function(tetris, moves, reflexSpeed) {
+        this.tetris = tetris;
+        this.moves = moves;
+        this.reflexSpeed = reflexSpeed || 0;
+    };
+
+    // Start playing Tetris.
+    ComputerPlayer.prototype.play = function() {
+        this.tetris.run();
+        this.makeMove();
+    };
+
+    // Makes next move in the sequence of moves.
+    // Once moves run out. Pause the game.
+    ComputerPlayer.prototype.makeMove = function() {
+        if (this.tetris.state === Tetris.GameState.RUNNING && this.moves.length > 0) {
+            this.tetris.handleKeyEvent(this.moves.shift());
+            var self = this;
+
+            if (this.reflexSpeed > 0) {
+                setTimeout(function() {
+                    self.makeMove();
+                }, this.reflexSpeed);
+            } else {
+                self.makeMove();
+            }
+        }
+    };
+    TetrisGA.ComputerPlayer = ComputerPlayer;
 
     // Simulate Tetris and calculate fitness based on
     // score.
