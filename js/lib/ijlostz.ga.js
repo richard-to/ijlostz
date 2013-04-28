@@ -1,5 +1,7 @@
 (function(window, undefined) {
 
+    var Tetris = window.Tetris;
+
     // Main namespace for Tetris Genetic Algorithm.
     var TetrisGA = {};
 
@@ -54,7 +56,7 @@
         if (this.moves.length > 0) {
             this.tetris.handleKeyEvent(this.moves.shift());
             var self = this;
-            window.setTimeout(function() {
+            setTimeout(function() {
                 self.makeMove();
             }, this.reflexSpeed);
         } else {
@@ -175,6 +177,14 @@
     };
     TetrisGA.initializeGenePool = initializeGenePool;
 
+    var cloneGenotype = function(genotype) {
+        return {
+            coordX: _.clone(genotype.coordX),
+            rotation: _.clone(genotype.rotation),
+            fitness: genotype.fitness
+        };
+    };
+    TetrisGA.cloneGenotype = cloneGenotype;
     // Select parents using tournament selection.
     // Tournament uses 2 parents only for now.
     var tournamentSelection = function(genotypes) {
@@ -183,9 +193,9 @@
             var challenger1 = genotypes[_.random(genotypes.length - 1)];
             var challenger2 = genotypes[_.random(genotypes.length - 1)];
             if (challenger1.fitness > challenger2.fitness) {
-                parents.push($.extend(true, [], challenger1));
+                parents.push(cloneGenotype(challenger1));
             } else {
-                parents.push($.extend(true, [], challenger2));
+                parents.push(cloneGenotype(challenger2));
             }
         }
         return parents;
@@ -206,8 +216,8 @@
         for (var i = 0; i < length; i++) {
             var index = i * 2;
             var index2 = index + 1;
-            var p1 = $.extend(true, {}, genotypes[index]);
-            var p2 = $.extend(true, {}, genotypes[index2]);
+            var p1 = cloneGenotype(genotypes[index]);
+            var p2 = cloneGenotype(genotypes[index2]);
             if (Math.random() < pc) {
                 var cIndex = 0;
                 var swap = false;
@@ -239,7 +249,10 @@
 
     // Mutation using random reset algorithm for integers.
     var mutationRandomReset = function(genotypes, pm) {
-        var mutations = $.extend(true, [], genotypes);
+        var mutations = [];
+        for (var i = 0; i < genotypes.length; i++) {
+            mutations.push(cloneGenotype(genotypes[i]));
+        }
         for (var i = 0; i < genotypes.length; i++) {
             for (var g = 0; g < genotypes[i].coordX.length; g++) {
                 if (Math.random() < pm) {
