@@ -627,7 +627,8 @@
     var Game = function(view, shapeBag, settings) {
         this.MILLISECONDS = 1000;
 
-        this.settings = _.extend(Settings, settings);
+        this.settings = {};
+        _.extend(this.settings, Settings, settings);
         this.debug = Debug;
         this.view = view;
         this.shapeBag = shapeBag || new RandomGenerator(ShapeList);
