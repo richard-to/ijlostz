@@ -1,9 +1,51 @@
 body {
+    background: black;
     margin-top: 50px;
 }
+
 canvas {
-    border: 1px solid #000;
+    border: 1px solid #ccc;
+    border-top: none;
     display: block;
     margin: auto;
     width:250px;
+}
+
+.game-container {
+    float:left;
+    width: 50%;
+}
+
+.info-container {
+    float:right;
+    width: 250px;
+}
+
+.info-wrap {
+    border: 1px solid #ddd;
+    color: #ddd;
+    font-family: monospace;
+    font-size: 18px;
+    padding: 0 15px;
+}
+
+.row {
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.label {
+    float:left;
+    width: 115px;
+}
+
+.help-wrap {
+    font-size: 14px;
+}
+
+.clear {
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
 }
