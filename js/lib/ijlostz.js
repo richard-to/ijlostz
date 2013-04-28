@@ -696,7 +696,7 @@
     Game.prototype.handleKeyEvent = function(keyCode) {
         var validAction = true;
         var action = this.keyevents[keyCode];
-        if (_.isFunction(action) && !this.paused) {
+        if (_.isFunction(action) && this.state === GameState.RUNNING) {
             action();
         } else if (keyCode === Control.PAUSE) {
             this.handlePauseToggle();
