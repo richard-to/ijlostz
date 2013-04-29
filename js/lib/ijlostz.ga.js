@@ -7,11 +7,11 @@
 
     // Settings for Tetris GA.
     // Currently this is not really used well.
-    // Refactor randCoordX and randRotation so this
+    // Refactor randXPos and randRotation so this
     // can just be removed.
     var Settings = {
         view: NullView,
-        maxCoordX: 10,
+        maxXPos: 10,
         maxRotation: 4
     };
     TetrisGA.Settings = Settings;
@@ -46,17 +46,17 @@
     // Clones genotype
     var cloneGenotype = function(genotype) {
         return {
-            coordX: genotype.coordX.slice(),
+            xPos: genotype.xPos.slice(),
             rotation: genotype.rotation.slice(),
             fitness: genotype.fitness
         };
     };
     TetrisGA.cloneGenotype = cloneGenotype;
 
-    var randCoordX = function() {
-        return _.random(Settings.maxCoordX - 1);
+    var randXPos = function() {
+        return _.random(Settings.maxXPos - 1);
     };
-    TetrisGA.randCoordX = randCoordX;
+    TetrisGA.randXPos = randXPos;
 
     var randRotation = function() {
         return _.random(Settings.maxRotation - 1);
@@ -71,9 +71,9 @@
     // TODO: Clean up function.
     var convertGenotypeToMoves = function(genotype, shapes) {
         var moves = [];
-        var coordX = genotype.coordX;
+        var xPos = genotype.xPos;
         var rotation = genotype.rotation;
-        var length = coordX.length;
+        var length = xPos.length;
         for (var i = 0; i < length; i++) {
             if (rotation[i] == 1) {
                 moves.push(Control.ROTATE_RIGHT);
@@ -83,11 +83,11 @@
             } else if (rotation[i] == 3) {
                 moves.push(Control.ROTATE_LEFT);
             }
-            if (coordX[i] < shapes[i].start.x) {
+            if (xPos[i] < shapes[i].start.x) {
                 var shapeIndex = rotation[i] % shapes[i].shape.length;
                 var shape = shapes[i].shape[shapeIndex];
                 var moves1 = shapes[i].start.x;
-                while(moves1 > coordX[i]) {
+                while(moves1 > xPos[i]) {
                     moves.push(Control.LEFT);
                     moves1--;
                 }
@@ -110,11 +110,11 @@
                     moves.push(Control.LEFT);
                     xSpace--;
                 }
-            } else if (coordX[i] > shapes[i].start.x) {
+            } else if (xPos[i] > shapes[i].start.x) {
                 var shapeIndex = rotation[i] % shapes[i].shape.length;
                 var shape = shapes[i].shape[shapeIndex];
                 var moves1 = shapes[i].start.x + shape[0].length - 1;
-                while (moves1 < coordX[i]) {
+                while (moves1 < xPos[i]) {
                     moves.push(Control.RIGHT);
                     moves1++;
                 }
@@ -160,11 +160,11 @@
         var genePool = [];
         _(populationSize).times(function(n){
             var sequence = {
-                coordX: [],
+                xPos: [],
                 rotation: []
             };
             _(tetrominoCount).times(function(n){
-                sequence.coordX.push(randCoordX());
+                sequence.xPos.push(randXPos());
                 sequence.rotation.push(randRotation());
             });
             genePool.push(sequence);
@@ -201,11 +201,11 @@
             var p1 = cloneGenotype(genotypes[index]);
             var p2 = cloneGenotype(genotypes[index2]);
             if (Math.random() < pc) {
-                for (var g = 0; g < p1.coordX.length; g++) {
+                for (var g = 0; g < p1.xPos.length; g++) {
                     if (Math.random() > ps) {
-                        var temp = p1.coordX[g];
-                        p1.coordX[g] = p2.coordX[g];
-                        p2.coordX[g] = temp;
+                        var temp = p1.xPos[g];
+                        p1.xPos[g] = p2.xPos[g];
+                        p2.xPos[g] = temp;
                     }
 
                     if (Math.random() > ps) {
@@ -242,7 +242,7 @@
                 var cIndex = 0;
                 var swap = false;
 
-                for (var g = 0; g < p1.coordX.length; g++) {
+                for (var g = 0; g < p1.xPos.length; g++) {
                     if (cIndex != null && crossPoints[cIndex] == g) {
                         cIndex++;
                         if (cIndex < crossPoints.length) {
@@ -251,11 +251,11 @@
                         swap = swap === false ? true : false;
                     }
                     if (swap) {
-                        var tempX = p1.coordX[g];
+                        var tempX = p1.xPos[g];
                         var tempRot = p1.rotation[g];
-                        p1.coordX[g] = p2.coordX[g];
+                        p1.xPos[g] = p2.xPos[g];
                         p1.rotation[g] = p2.rotation[g];
-                        p2.coordX[g] = tempX;
+                        p2.xPos[g] = tempX;
                         p2.rotation[g] = tempRot;
                     }
                 }
@@ -274,9 +274,9 @@
             mutations.push(cloneGenotype(genotypes[i]));
         }
         for (var i = 0; i < genotypes.length; i++) {
-            for (var g = 0; g < genotypes[i].coordX.length; g++) {
+            for (var g = 0; g < genotypes[i].xPos.length; g++) {
                 if (Math.random() < pm) {
-                   mutations[i].coordX[g] = randCoordX();
+                   mutations[i].xPos[g] = randXPos();
                 }
                 if (Math.random() < pm) {
                     mutations[i].rotation[g] = randRotation();
