@@ -129,6 +129,7 @@
                     if (found)
                         break;
                 }
+
                 while (xSpace < shape[0].length - 1) {
                     moves.push(Control.RIGHT);
                     xSpace++;
@@ -240,7 +241,7 @@
         for (var i = 0; i < genotypes.length; i++) {
             for (var g = 0; g < genotypes[i].coordX.length; g++) {
                 if (Math.random() < pm) {
-                    mutations[i].coordX[g] = randCoordX();
+                   mutations[i].coordX[g] = randCoordX();
                 }
                 if (Math.random() < pm) {
                     mutations[i].rotation[g] = randRotation();
