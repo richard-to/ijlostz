@@ -43,35 +43,35 @@
         });
     playerTetris.run();
 
-    var cpuTetris = null;
-    function onScoreUpdated2(score) {
-        $(settings.selector.cpuScore).text(score);
-        if (score > parseInt($(settings.selector.cpuBest).text())) {
-             $(settings.selector.cpuBest).text(score);
-        }
-    }
-
-    function onGameEnd2(score) {
-        cpuTetris = null;
-    }
-
-    function onScoreUpdated(score) {
+    function onPlayerScoreUpdated(score) {
         $(settings.selector.playerScore).text(score);
         if (score > parseInt($(settings.selector.playerBest).text())) {
              $(settings.selector.playerBest).text(score);
         }
     }
 
-    function onGameEnd(score) {
+    function onPlayerGameEnd(score) {
         $(settings.selector.playerScore).text(0);
         playerTetris = new Tetris.Game(
             new Tetris.CanvasView(playerCanvas),
             new TetrisGA.MockGenerator(shapes.slice()),
             {
-                onGameEnd: onGameEnd,
-                onScoreUpdated: onScoreUpdated
+                onGameEnd: onPlayerGameEnd,
+                onScoreUpdated: onPlayerScoreUpdated
             });
         playerTetris.run();
+    }
+
+    var cpuTetris = null;
+    function onCpuScoreUpdated(score) {
+        $(settings.selector.cpuScore).text(score);
+        if (score > parseInt($(settings.selector.cpuBest).text())) {
+             $(settings.selector.cpuBest).text(score);
+        }
+    }
+
+    function onCpuGameEnd(score) {
+        cpuTetris = null;
     }
 
     var workerPool = new TetrisGA.WorkerPool(settings.workers.script, settings.workers.num);
@@ -95,7 +95,6 @@
         }
 
         if (returned === genotypes.length) {
-
             if (cpuTetris == null) {
                 $(settings.selector.cpuScore).text(0);
 
@@ -107,8 +106,8 @@
                     shapeBag2,
                     {
                         keysEnabled: false,
-                        onGameEnd: onGameEnd2,
-                        onScoreUpdated: onScoreUpdated2
+                        onGameEnd: onCpuGameEnd,
+                        onScoreUpdated: onCpuScoreUpdated
                     });
                 var player = new TetrisGA.ComputerPlayer(cpuTetris, moves2, null)
                 player.play();
