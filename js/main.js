@@ -3,6 +3,7 @@
     // Global settings for Tetris GA
     var settings = {
         population: 100,
+        shapeList: Tetris.ShapeList,
         shapes: 20,
         generations: 125,
         pc: .93,
@@ -24,16 +25,20 @@
         }
     };
 
+    // Get canvas elements that represent game board.
     var playerCanvas = document.getElementById(settings.id.playerCanvas);
     var cpuCanvas = document.getElementById(settings.id.cpuCanvas);
 
-    var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
-    var shapes = TetrisGA.initializeShapes(settings.shapes, randomGen);
-    //var shapes = [];
-    //_(20).times(function(n){ shapes.push(Tetris.ShapeO)});
+    // Random tetromino generator given a list of valid shapes.
+    var randomGen = new Tetris.RandomGenerator(settings.shapeList);
 
+    // Initialize a random sequence of n shapes with Random generator.
+    var shapes = TetrisGA.initializeShapes(settings.shapes, randomGen);
+
+    // Create n genotypes for generation 0.
     var genotypes = TetrisGA.initializeGenePool(settings.population, shapes.length);
 
+    // Create tetris game for player.
     var playerTetris = new Tetris.Game(
         new Tetris.CanvasView(playerCanvas),
         new TetrisGA.MockGenerator(shapes.slice()),
@@ -43,6 +48,7 @@
         });
     playerTetris.run();
 
+    // Callback that updates player score when score changes.
     function onPlayerScoreUpdated(score) {
         $(settings.selector.playerScore).text(score);
         if (score > parseInt($(settings.selector.playerBest).text())) {
@@ -50,6 +56,7 @@
         }
     }
 
+    // Callback that restarts tetris game for player after Tetrominos sequence finished.
     function onPlayerGameEnd(score) {
         $(settings.selector.playerScore).text(0);
         playerTetris = new Tetris.Game(
@@ -62,7 +69,11 @@
         playerTetris.run();
     }
 
+    // Initialize a null cpuTetris player. Instantiate when worker jobs completed for each generation if
+    // value is still null.
     var cpuTetris = null;
+
+    // Callback that update CPU score.
     function onCpuScoreUpdated(score) {
         $(settings.selector.cpuScore).text(score);
         if (score > parseInt($(settings.selector.cpuBest).text())) {
@@ -70,31 +81,43 @@
         }
     }
 
+    // Callback that sets cpuTetris back to null so a new simulation can be run if available.
     function onCpuGameEnd(score) {
         cpuTetris = null;
     }
 
+    // Run Tetris GA simulation using Worker pool.
     var workerPool = new TetrisGA.WorkerPool(settings.workers.script, settings.workers.num);
     for (var i = 0; i < genotypes.length; i++) {
         workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
     }
 
-    var returned = 0;
+    var jobsCompleted = 0;
     var currentGeneration = 0;
-    var bestScore = 0;
+    var bestFitness = 0;
     var bestGenotype = null;
-    var sumScores = 0;
+    var sumFitness = 0;
 
+    // Callback for when web worker jobs completed
+    // Returns a genotype with simulated fitness value.
     function onJobCompleted(genotype) {
-        returned++;
+        // Keep track of completed jobs. Once all completed, then move
+        // we can move to next generation.
+        jobsCompleted++;
 
-        sumScores += genotype.fitness;
-        if (genotype.fitness >= bestScore) {
-            bestScore = genotype.fitness;
+        // Add up fitness so we can average them out later.
+        sumFitness += genotype.fitness;
+
+        // Keep track of best genotype of generation.
+        if (genotype.fitness >= bestFitness) {
+            bestFitness = genotype.fitness;
             bestGenotype = TetrisGA.cloneGenotype(genotype);
         }
 
-        if (returned === genotypes.length) {
+        // Generation end condition is when all genotypes have been simulated.
+        if (jobsCompleted === genotypes.length) {
+
+            // If no cpu simulation is running, run the best simulation.
             if (cpuTetris == null) {
                 $(settings.selector.cpuScore).text(0);
 
@@ -113,14 +136,26 @@
                 player.play();
             }
 
-            var avgScore = sumScores / settings.population;
+            // Average the sum of all fitness values.
+            var avgScore = sumFitness / settings.population;
+
+            // Display results to UI.
             var li = $("<li>");
-            li.text(bestScore + " (" + avgScore.toFixed(2) + ")");
+            li.text(bestFitness + " (" + avgScore.toFixed(2) + ")");
             $(settings.selector.resultList).append(li);
-            returned = 0;
-            bestScore = 0;
-            sumScores = 0;
+
+            jobsCompleted = 0;
+            bestFitness = 0;
+            sumFitness = 0;
             currentGeneration++;
+
+            // Simulate the next generation if there are more to do.
+            //
+            // 1. Select parents
+            // 2. Perform crossover on parents
+            // 3. Mutation children
+            // 4. Simulate fitness values of new generation
+            // 5. Repeat.
             if (currentGeneration < settings.generations) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
                 var children = TetrisGA.uniformCrossover(parents, settings.pc);
