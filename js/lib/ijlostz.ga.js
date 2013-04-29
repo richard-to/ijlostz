@@ -43,8 +43,8 @@
     // Clones genotype
     var cloneGenotype = function(genotype) {
         return {
-            coordX: _.clone(genotype.coordX),
-            rotation: _.clone(genotype.rotation),
+            coordX: genotype.coordX.slice(),
+            rotation: genotype.rotation.slice(),
             fitness: genotype.fitness
         };
     };
