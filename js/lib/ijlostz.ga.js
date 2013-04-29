@@ -192,6 +192,7 @@
 
     // Uniform crossover
     var uniformCrossover = function(genotypes, pc) {
+        var ps = 0.5;
         var children = [];
         var length = Math.floor(genotypes.length / 2);
         for (var i = 0; i < length; i++) {
@@ -201,13 +202,13 @@
             var p2 = cloneGenotype(genotypes[index2]);
             if (Math.random() < pc) {
                 for (var g = 0; g < p1.coordX.length; g++) {
-                    if (Math.random() > .5) {
+                    if (Math.random() > ps) {
                         var temp = p1.coordX[g];
                         p1.coordX[g] = p2.coordX[g];
                         p2.coordX[g] = temp;
                     }
 
-                    if (Math.random() > .5) {
+                    if (Math.random() > ps) {
                         var temp = p1.rotation[g];
                         p1.rotation[g] = p2.rotation[g];
                         p2.rotation[g] = temp;
