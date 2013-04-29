@@ -43,8 +43,8 @@
         new Tetris.CanvasView(playerCanvas),
         new TetrisGA.MockGenerator(shapes.slice()),
         {
-            onGameEnd: onGameEnd,
-            onScoreUpdated: onScoreUpdated
+            onGameEnd: onPlayerGameEnd,
+            onScoreUpdated: onPlayerScoreUpdated
         });
     playerTetris.run();
 
@@ -100,6 +100,8 @@
 
     // Callback for when web worker jobs completed
     // Returns a genotype with simulated fitness value.
+    //
+    // Need to refactor this at some point.
     function onJobCompleted(genotype) {
         // Keep track of completed jobs. Once all completed, then move
         // we can move to next generation.
