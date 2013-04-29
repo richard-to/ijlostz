@@ -57,13 +57,16 @@
     var canvas = document.getElementById(CANVAS_ID);
     var canvas2 = document.getElementById("cpu-board");
 
-    var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
-    var shapes = TetrisGA.initializeShapes(10, randomGen);
-    var genotypes = TetrisGA.initializeGenePool(50, shapes.length);
+    //var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
+    //var shapes = TetrisGA.initializeShapes(30, randomGen);
+    var shapes = [];
+    _(20).times(function(n){ shapes.push(Tetris.ShapeO)});
+
+    var genotypes = TetrisGA.initializeGenePool(100, shapes.length);
 
     var tetris = new Tetris.Game(
         new Tetris.CanvasView(canvas),
-        new TetrisGA.MockGenerator(_.clone(shapes)),
+        new TetrisGA.MockGenerator(shapes.slice()),
         {
             onGameEnd: onGameEnd,
             onScoreUpdated: onScoreUpdated
@@ -93,8 +96,11 @@
         $(".player-game-container .score").text(0);
         tetris = new Tetris.Game(
             new Tetris.CanvasView(canvas),
-            new TetrisGA.MockGenerator(_.clone(shapes)),
-            {onGameEnd: onGameEnd});
+            new TetrisGA.MockGenerator(shapes.slice()),
+            {
+                onGameEnd: onGameEnd,
+                onScoreUpdated: onScoreUpdated
+            });
         tetris.run();
     }
 
@@ -122,7 +128,7 @@
                 $(".cpu-game-container .score").text(0);
 
                 var moves2 = TetrisGA.convertGenotypeToMoves(bestGenotype, shapes);
-                var shapeBag2 = new TetrisGA.MockGenerator(_.clone(shapes));
+                var shapeBag2 = new TetrisGA.MockGenerator(shapes.slice());
 
                 tetris2 = new Tetris.Game(
                     new Tetris.CanvasView(canvas2),
@@ -136,7 +142,7 @@
                 player.play();
             }
 
-            var avgScore = sumScores / 50;
+            var avgScore = sumScores / 100;
             var li = $("<li>");
             li.text(bestScore + " (" + avgScore.toFixed(2) + ")");
             $(".results-list").append(li);
@@ -144,10 +150,10 @@
             bestScore = 0;
             sumScores = 0;
             currentGeneration++;
-            if (currentGeneration < 50) {
+            if (currentGeneration < 125) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
-                var children = TetrisGA.crossoverNPoint(parents, 2, .9);
-                var mutations = TetrisGA.mutationRandomReset(children, 0.1);
+                var children = TetrisGA.uniformCrossover(parents, .93);
+                var mutations = TetrisGA.mutationRandomReset(children, 0.07);
                 genotypes = mutations;
                 for (var i = 0; i < genotypes.length; i++) {
                     workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
