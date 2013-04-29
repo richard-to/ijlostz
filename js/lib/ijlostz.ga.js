@@ -293,16 +293,52 @@
         var state = tetris.frozenBoard.state;
         var height = tetris.frozenBoard.height;
         var width = tetris.frozenBoard.width;
+        var stackHeight = 0;
         for (var y = 0; y < height; ++y) {
-            var isLine = true;
             for (var x = 0; x < width; ++x) {
                 if (state[y][x] !== 0) {
-                    return y + score;
+                    stackHeight = y;
                     break;
                 }
             }
+            if (stackHeight > 0) {
+                break;
+            }
+        }
+        var totalPoints = 0;
+        for (var y = stackHeight; y < height; ++y) {
+            var filled = 0;
+            var streak = 0;
+            var highStreak = 0;
+            for (var x = 0; x < width; ++x) {
+                if (state[y][x] !== 0) {
+                    filled++;
+                    streak++;
+                } else {
+                    if (streak > highStreak) {
+                        highStreak = streak;
+                    }
+                    streak = 0;
+                }
+            }
+
+            if (y > 5) {
+                if (highStreak > 8) {
+                    highStreak = 3;
+                } else if (highStreak > 5) {
+                    highStreak = 1.5;
+                } else {
+                    highStreak = 1;
+                }
+                totalPoints += ((filled * highStreak)) / 2;
+            }
         }
         return score;
+        if (stackHeight > 50) {
+            return Math.round(totalPoints * 2 + score);
+        } else {
+            return Math.round(totalPoints + score);
+        }
     }
     TetrisGA.calculateFitness = calculateFitness;
 
