@@ -1,69 +1,90 @@
 (function() {
 
+    // Global settings for Tetris GA
+    var settings = {
+        population: 100,
+        shapes: 20,
+        generations: 125,
+        pc: .93,
+        pm: .1,
+        workers: {
+            script: "static/js/worker.js",
+            num: 8
+        },
+        id: {
+            playerCanvas: "player-board",
+            cpuCanvas: "cpu-board",
+        },
+        selector: {
+            playerScore: ".player-game-container .score",
+            playerBest: ".player-game-container .best-score",
+            cpuScore: ".cpu-game-container .score",
+            cpuBest: ".cpu-game-container .best-score",
+            resultList: ".results-list"
         }
     };
 
-    var CANVAS_ID = "player-board";
+    var playerCanvas = document.getElementById(settings.id.playerCanvas);
+    var cpuCanvas = document.getElementById(settings.id.cpuCanvas);
 
-    var canvas = document.getElementById(CANVAS_ID);
-    var canvas2 = document.getElementById("cpu-board");
+    var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
+    var shapes = TetrisGA.initializeShapes(settings.shapes, randomGen);
+    //var shapes = [];
+    //_(20).times(function(n){ shapes.push(Tetris.ShapeO)});
 
-    //var randomGen = new Tetris.RandomGenerator(Tetris.ShapeList);
-    //var shapes = TetrisGA.initializeShapes(30, randomGen);
-    var shapes = [];
-    _(20).times(function(n){ shapes.push(Tetris.ShapeO)});
+    var genotypes = TetrisGA.initializeGenePool(settings.population, shapes.length);
 
-    var genotypes = TetrisGA.initializeGenePool(100, shapes.length);
-
-    var tetris = new Tetris.Game(
-        new Tetris.CanvasView(canvas),
+    var playerTetris = new Tetris.Game(
+        new Tetris.CanvasView(playerCanvas),
         new TetrisGA.MockGenerator(shapes.slice()),
         {
             onGameEnd: onGameEnd,
             onScoreUpdated: onScoreUpdated
         });
-    tetris.run();
+    playerTetris.run();
 
-    var tetris2 = null;
+    var cpuTetris = null;
     function onScoreUpdated2(score) {
-        $(".cpu-game-container .score").text(score);
-        if (score > parseInt($(".cpu-game-container .best-score").text())) {
-             $(".cpu-game-container .best-score").text(score);
+        $(settings.selector.cpuScore).text(score);
+        if (score > parseInt($(settings.selector.cpuBest).text())) {
+             $(settings.selector.cpuBest).text(score);
         }
     }
 
     function onGameEnd2(score) {
-        tetris2 = null;
+        cpuTetris = null;
     }
 
     function onScoreUpdated(score) {
-        $(".player-game-container .score").text(score);
-        if (score > parseInt($(".player-game-container .best-score").text())) {
-             $(".player-game-container .best-score").text(score);
+        $(settings.selector.playerScore).text(score);
+        if (score > parseInt($(settings.selector.playerBest).text())) {
+             $(settings.selector.playerBest).text(score);
         }
     }
 
     function onGameEnd(score) {
-        $(".player-game-container .score").text(0);
-        tetris = new Tetris.Game(
-            new Tetris.CanvasView(canvas),
+        $(settings.selector.playerScore).text(0);
+        playerTetris = new Tetris.Game(
+            new Tetris.CanvasView(playerCanvas),
             new TetrisGA.MockGenerator(shapes.slice()),
             {
                 onGameEnd: onGameEnd,
                 onScoreUpdated: onScoreUpdated
             });
-        tetris.run();
+        playerTetris.run();
     }
 
-    var workerPool = new WorkerPool("static/js/worker.js", 8);
+    var workerPool = new TetrisGA.WorkerPool(settings.workers.script, settings.workers.num);
     for (var i = 0; i < genotypes.length; i++) {
         workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
     }
+
     var returned = 0;
     var currentGeneration = 0;
     var bestScore = 0;
     var bestGenotype = null;
     var sumScores = 0;
+
     function onJobCompleted(genotype) {
         returned++;
 
@@ -75,40 +96,39 @@
 
         if (returned === genotypes.length) {
 
-            if (tetris2 == null) {
-                $(".cpu-game-container .score").text(0);
+            if (cpuTetris == null) {
+                $(settings.selector.cpuScore).text(0);
 
                 var moves2 = TetrisGA.convertGenotypeToMoves(bestGenotype, shapes);
                 var shapeBag2 = new TetrisGA.MockGenerator(shapes.slice());
 
-                tetris2 = new Tetris.Game(
-                    new Tetris.CanvasView(canvas2),
+                cpuTetris = new Tetris.Game(
+                    new Tetris.CanvasView(cpuCanvas),
                     shapeBag2,
                     {
                         keysEnabled: false,
                         onGameEnd: onGameEnd2,
                         onScoreUpdated: onScoreUpdated2
                     });
-                var player = new TetrisGA.ComputerPlayer(tetris2, moves2, null)
+                var player = new TetrisGA.ComputerPlayer(cpuTetris, moves2, null)
                 player.play();
             }
 
-            var avgScore = sumScores / 100;
+            var avgScore = sumScores / settings.population;
             var li = $("<li>");
             li.text(bestScore + " (" + avgScore.toFixed(2) + ")");
-            $(".results-list").append(li);
+            $(settings.selector.resultList).append(li);
             returned = 0;
             bestScore = 0;
             sumScores = 0;
             currentGeneration++;
-            if (currentGeneration < 125) {
+            if (currentGeneration < settings.generations) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
-                var children = TetrisGA.uniformCrossover(parents, .93);
-                var mutations = TetrisGA.mutationRandomReset(children, 0.07);
+                var children = TetrisGA.uniformCrossover(parents, settings.pc);
+                var mutations = TetrisGA.mutationRandomReset(children, settings.pm);
                 genotypes = mutations;
                 for (var i = 0; i < genotypes.length; i++) {
                     workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
-
                 }
             } else {
                 workerPool.terminateAll();
