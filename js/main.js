@@ -1,13 +1,22 @@
 (function() {
+/*
+    genotype = {
+        xPos: [9],
+        rotation: [1]
+    }
+    shapes = [Tetris.ShapeI];
+    moves = TetrisGA.convertGenotypeToMoves(genotype, shapes);
+    console.log(moves);
+*/
 
     // Global settings for Tetris GA
     var settings = {
         population: 100,
-        shapeList: Tetris.ShapeList,
+        shapeList: [Tetris.ShapeI],//Tetris.ShapeList,
         shapes: 20,
         generations: 125,
-        pc: .93,
-        pm: .1,
+        pc: 0.95,
+        pm: 0.05,
         workers: {
             script: "static/js/worker.js",
             num: 8
