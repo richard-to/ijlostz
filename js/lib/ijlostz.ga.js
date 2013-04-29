@@ -230,6 +230,8 @@
     // Crossover allelele at N randomly selected points.
     // Number of genotypes must be an even number. Currently
     // does not handle that case yet.
+    //
+    // TODO: New crossover points should be chosen for each pair.
     var crossoverNPoint = function(genotypes, n, pc) {
         var children = [];
         var length = genotypes.length / 2;
