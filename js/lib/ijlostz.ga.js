@@ -395,5 +395,59 @@
     };
     TetrisGA.simulateFitness = simulateFitness;
 
+    // Web worker pool to run Tetris simulations in background
+    var WorkerPool = function(script, numWorkers) {
+        var event = "message";
+        var numWorkers = numWorkers;
+        var tasks = [];
+        var pool = [];
+        var pending = {};
+        var workers = {};
+
+        var runJob = function(data, callback) {
+            if (pool.length > 0) {
+                var workerMeta = pool.shift();
+                var id = workerMeta.id;
+                var worker = workerMeta.worker;
+                worker.postMessage({id: id, data: data});
+                pending[id] = callback;
+            } else {
+                tasks.push({data: data, callback: callback});
+            }
+        };
+        this.runJob = runJob;
+
+        for (var i = 0; i < numWorkers; i++) {
+            var worker = new Worker(script);
+            worker.addEventListener(event, function(msg) {
+                var id = msg.data.id;
+                var data = msg.data.data;
+                var callback = pending[id];
+
+                pending[id] = null;
+                delete pending[id];
+
+                pool.push({id: id, worker: workers[id]});
+
+                if (tasks.length > 0) {
+                    var task = tasks.shift();
+                    runJob(task.data, task.callback);
+                }
+
+                callback(data);
+            }, false);
+            workers[i] = worker;
+            pool.push({id: i, worker: worker});
+        }
+
+        this.terminateAll = function() {
+            for (id in workers) {
+                workers[id].terminate();
+                delete workers[id];
+            }
+        }
+    };
+    TetrisGA.WorkerPool = WorkerPool;
+
     window.TetrisGA = TetrisGA;
 })(window);
