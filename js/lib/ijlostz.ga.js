@@ -6,6 +6,9 @@
     var TetrisGA = {};
 
     // Settings for Tetris GA.
+    // Currently this is not really used well.
+    // Refactor randCoordX and randRotation so this
+    // can just be removed.
     var Settings = {
         view: NullView,
         maxCoordX: 10,
