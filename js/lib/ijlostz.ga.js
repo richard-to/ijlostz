@@ -110,13 +110,13 @@
             } else if (coordX[i] > shapes[i].start.x) {
                 var shapeIndex = rotation[i] % shapes[i].shape.length;
                 var shape = shapes[i].shape[shapeIndex];
-                var moves1 = shapes[i].start.x;
-                while(moves1 < coordX[i]) {
+                var moves1 = shapes[i].start.x + shape[0].length - 1;
+                while (moves1 < coordX[i]) {
                     moves.push(Control.RIGHT);
                     moves1++;
                 }
 
-                var xSpace = 0;
+                var xSpace = shape[0].length - 1;
                 var found = false;
                 for (var x = shape[0].length - 1; x >= 0; x--) {
                     for (var y = 0; y < shape.length; y++) {
