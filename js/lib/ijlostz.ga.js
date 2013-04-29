@@ -187,6 +187,37 @@
     };
     TetrisGA.tournamentSelection = tournamentSelection;
 
+    // Uniform crossover
+    var uniformCrossover = function(genotypes, pc) {
+        var children = [];
+        var length = Math.floor(genotypes.length / 2);
+        for (var i = 0; i < length; i++) {
+            var index = i * 2;
+            var index2 = index + 1;
+            var p1 = cloneGenotype(genotypes[index]);
+            var p2 = cloneGenotype(genotypes[index2]);
+            if (Math.random() < pc) {
+                for (var g = 0; g < p1.coordX.length; g++) {
+                    if (Math.random() > .5) {
+                        var temp = p1.coordX[g];
+                        p1.coordX[g] = p2.coordX[g];
+                        p2.coordX[g] = temp;
+                    }
+
+                    if (Math.random() > .5) {
+                        var temp = p1.rotation[g];
+                        p1.rotation[g] = p2.rotation[g];
+                        p2.rotation[g] = temp;
+                    }
+                }
+            }
+            children.push(p1);
+            children.push(p2);
+        }
+        return children;
+    };
+    TetrisGA.uniformCrossover = uniformCrossover;
+
     // N-point crossover
     var crossoverNPoint = function(genotypes, n, pc) {
         var children = [];
