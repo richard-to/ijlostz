@@ -191,6 +191,9 @@
     TetrisGA.tournamentSelection = tournamentSelection;
 
     // Uniform crossover
+    //
+    // If chosen for crossover, go through each allele and
+    //randomly choose to swap or not swap alleles.
     var uniformCrossover = function(genotypes, pc) {
         var ps = 0.5;
         var children = [];
@@ -223,6 +226,10 @@
     TetrisGA.uniformCrossover = uniformCrossover;
 
     // N-point crossover
+    //
+    // Crossover allelele at N randomly selected points.
+    // Number of genotypes must be an even number. Currently
+    // does not handle that case yet.
     var crossoverNPoint = function(genotypes, n, pc) {
         var children = [];
         var length = genotypes.length / 2;
@@ -268,6 +275,9 @@
     TetrisGA.crossoverNPoint = crossoverNPoint;
 
     // Mutation using random reset algorithm for integers.
+    //
+    // Go through each allele and randomly pick a new value if within
+    // mutation probability range
     var mutationRandomReset = function(genotypes, pm) {
         var mutations = [];
         for (var i = 0; i < genotypes.length; i++) {
