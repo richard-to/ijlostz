@@ -1,5 +1,6 @@
 body {
     background: black;
+    font-family: monospace;
     margin-top: 50px;
 }
 
@@ -9,6 +10,81 @@ canvas {
     display: block;
     margin: auto;
     width:250px;
+}
+
+.settings-container {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-left: none;
+    color: #666;
+    padding: 15px;
+    overflow:hidden;
+    width: 550px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: scroll;
+}
+
+.settings-container .column {
+    width: 47%;
+    float:left;
+}
+
+.settings-container .column-right {
+    float:right;
+}
+
+.settings-container h2 {
+    margin: 0 0 10px 0;
+}
+
+.settings-container ul {
+    padding: 0;
+    list-style: none;
+}
+
+.settings-container li {
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.settings-container label {
+    display:block;
+}
+
+.settings-container select {
+    width: 100%;
+}
+
+.settings-container select[multiple="multiple"] {
+    height: 100px;
+}
+
+.settings-container p {
+    font-style: italic;
+    font-size: .90em;
+    margin: 0;
+}
+
+.settings-container input[type="text"] {
+    border: 1px solid #ddd;
+    color: #222;
+    padding: 5px 10px;
+    width: 90%;
+}
+
+.settings-container .simulate-button {
+    background: green;
+    border: None;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-size: 18px;
+    font-family: monospace;
+    padding: 5px 10px;
+    width: 100%;
 }
 
 .game-container {
@@ -24,7 +100,6 @@ canvas {
 .info-wrap {
     border: 1px solid #ddd;
     color: #ddd;
-    font-family: monospace;
     font-size: 18px;
     padding: 0 15px;
 }
@@ -64,7 +139,6 @@ canvas {
     cursor: pointer;
     display: block;
     font-size: 18px;
-    font-family: monospace;
     padding: 5px 10px;
     width: 100%;
 }
@@ -79,8 +153,8 @@ canvas {
 }
 
 .clear {
+    clear:both;
     height: 0;
     margin: 0;
-    overflow: hidden;
     padding: 0;
 }
