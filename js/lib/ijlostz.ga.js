@@ -353,6 +353,33 @@
     };
     TetrisGA.mutationRandomReset = mutationRandomReset;
 
+    // Creep mutation implementation.
+    var mutationCreep = function(genotypes, range, pmx, pmr) {
+        var mutations = [];
+        for (var i = 0; i < genotypes.length; i++) {
+            mutations.push(cloneGenotype(genotypes[i]));
+        }
+        for (var i = 0; i < mutations.length; i++) {
+            for (var g = 0; g < mutations[i].xPos.length; g++) {
+                if (Math.random() < pmx) {
+                    var creepVal = _.random(range.min, range.max);
+                    var newXPos = mutations[i].xPos[g] + creepVal;
+                    if (newXPos < 0) {
+                        newXPos = 0;
+                    } else if (newXPos >= Constraints.WIDTH) {
+                        newXPos = Constraints.WIDTH - 1;
+                    }
+                    mutations[i].xPos[g] = newXPos;
+                }
+
+                if (Math.random() < pmr) {
+                    mutations[i].rotation[g] = randRotation();
+                }
+            }
+            return mutations;
+        }
+    };
+    TetrisGA.mutationCreep = mutationCreep;
 
     // A Computer player that plays tetris using a specific
     // sequence of moves at a constant speed per move.
