@@ -197,17 +197,21 @@
     TetrisGA.initializeGenePool = initializeGenePool;
 
     // Select parents using tournament selection.
-    // Tournament uses 2 parents only for now.
-    var tournamentSelection = function(genotypes) {
+    // K represents the number of challengers to pick from.
+    var tournamentSelection = function(genotypes, k) {
         var parents = [];
-        while (parents.length < genotypes.length) {
-            var challenger1 = genotypes[_.random(genotypes.length - 1)];
-            var challenger2 = genotypes[_.random(genotypes.length - 1)];
-            if (challenger1.fitness > challenger2.fitness) {
-                parents.push(cloneGenotype(challenger1));
-            } else {
-                parents.push(cloneGenotype(challenger2));
+        var length = genotypes.length;
+        var max = length - 1;
+        while (parents.length < length) {
+            var best = null;
+            var challengers = [];
+            _(k).times(challengers.push(_.random(max)));
+            for (var i = 0; i < k; i++) {
+                if (best == null || challengers[i].fitness > best.fitness) {
+                    best = challengers[i];
+                }
             }
+            parents.push(best);
         }
         return parents;
     };
