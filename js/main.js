@@ -1,14 +1,15 @@
 (function() {
-/*
+
     genotype = {
         xPos: [9],
         rotation: [1]
     }
     shapes = [Tetris.ShapeI];
-    moves = TetrisGA.convertGenotypeToMoves(genotype, shapes);
+    var converter = new TetrisGA.GenotypeToMoveConverter();
+    moves = converter.convert(genotype, shapes);
     console.log(moves);
-*/
 
+/*
     // Global settings for Tetris GA
     var settings = {
         population: 100,
@@ -131,8 +132,8 @@
             // If no cpu simulation is running, run the best simulation.
             if (cpuTetris == null) {
                 $(settings.selector.cpuScore).text(0);
-
-                var moves2 = TetrisGA.convertGenotypeToMoves(bestGenotype, shapes);
+                var converter = new TetrisGA.GenotypeToMoveConverter();
+                var moves2 = converter.convert(bestGenotype, shapes);
                 var shapeBag2 = new TetrisGA.MockGenerator(shapes.slice());
 
                 cpuTetris = new Tetris.Game(
@@ -179,5 +180,5 @@
                 workerPool.terminateAll();
             }
         }
-    }
+    }*/
 })();

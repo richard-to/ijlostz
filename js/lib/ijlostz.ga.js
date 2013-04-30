@@ -5,16 +5,12 @@
     // Main namespace for Tetris Genetic Algorithm.
     var TetrisGA = {};
 
-    // Settings for Tetris GA.
-    // Currently this is not really used well.
-    // Refactor randXPos and randRotation so this
-    // can just be removed.
-    var Settings = {
-        view: NullView,
-        maxXPos: 10,
-        maxRotation: 4
+    var Constraints = {
+        WIDTH: 10,
+        HEIGHT: 22,
+        ROTATION: 4
     };
-    TetrisGA.Settings = Settings;
+    TetrisGA.Constraints = Constraints;
 
     // A view object that does nothing. It is not necessary
     // to show the canvas when running the simulation.
@@ -54,12 +50,12 @@
     TetrisGA.cloneGenotype = cloneGenotype;
 
     var randXPos = function() {
-        return _.random(Settings.maxXPos - 1);
+        return _.random(Constraints.WIDTH - 1);
     };
     TetrisGA.randXPos = randXPos;
 
     var randRotation = function() {
-        return _.random(Settings.maxRotation - 1);
+        return _.random(Constraints.ROTATION - 1);
     };
     TetrisGA.randRotation = randRotation;
 
