@@ -216,7 +216,7 @@
     //
     // If chosen for crossover, go through each allele and
     //randomly choose to swap or not swap alleles.
-    var uniformCrossover = function(genotypes, pc) {
+    var uniformCrossover = function(genotypes, pcx, pcr) {
         var ps = 0.5;
         var children = [];
         var length = Math.floor(genotypes.length / 2);
@@ -225,14 +225,18 @@
             var index2 = index + 1;
             var p1 = cloneGenotype(genotypes[index]);
             var p2 = cloneGenotype(genotypes[index2]);
-            if (Math.random() < pc) {
+            if (Math.random() < pcx) {
                 for (var g = 0; g < p1.xPos.length; g++) {
                     if (Math.random() > ps) {
                         var temp = p1.xPos[g];
                         p1.xPos[g] = p2.xPos[g];
                         p2.xPos[g] = temp;
                     }
+                }
+            }
 
+            if (Math.random() < pcr) {
+                for (var g = 0; g < p1.rotation.length; g++) {
                     if (Math.random() > ps) {
                         var temp = p1.rotation[g];
                         p1.rotation[g] = p2.rotation[g];
