@@ -8,7 +8,8 @@
     var Constraints = {
         WIDTH: 10,
         HEIGHT: 22,
-        ROTATION: 4
+        ROTATION: 4,
+        STACK_BONUS: 4
     };
     TetrisGA.Constraints = Constraints;
 
@@ -421,6 +422,7 @@
         var state = tetris.frozenBoard.state;
         var height = tetris.frozenBoard.height;
         var width = tetris.frozenBoard.width;
+
         var stackHeight = 0;
         for (var y = 0; y < height; ++y) {
             for (var x = 0; x < width; ++x) {
@@ -433,40 +435,7 @@
                 break;
             }
         }
-        var totalPoints = 0;
-        for (var y = stackHeight; y < height; ++y) {
-            var filled = 0;
-            var streak = 0;
-            var highStreak = 0;
-            for (var x = 0; x < width; ++x) {
-                if (state[y][x] !== 0) {
-                    filled++;
-                    streak++;
-                } else {
-                    if (streak > highStreak) {
-                        highStreak = streak;
-                    }
-                    streak = 0;
-                }
-            }
-
-            if (y > 5) {
-                if (highStreak > 8) {
-                    highStreak = 3;
-                } else if (highStreak > 5) {
-                    highStreak = 1.5;
-                } else {
-                    highStreak = 1;
-                }
-                totalPoints += ((filled * highStreak)) / 2;
-            }
-        }
-        return score;
-        if (stackHeight > 50) {
-            return Math.round(totalPoints * 2 + score);
-        } else {
-            return Math.round(totalPoints + score);
-        }
+        return score + stackHeight * Constraints.STACK_BONUS;
     }
     TetrisGA.calculateFitness = calculateFitness;
 
