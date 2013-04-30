@@ -1,23 +1,42 @@
 (function() {
 
-    genotype = {
-        xPos: [9],
-        rotation: [1]
-    }
-    shapes = [Tetris.ShapeI];
-    var converter = new TetrisGA.GenotypeToMoveConverter();
-    moves = converter.convert(genotype, shapes);
-    console.log(moves);
-
-/*
     // Global settings for Tetris GA
     var settings = {
         population: 100,
-        shapeList: [Tetris.ShapeI],//Tetris.ShapeList,
+        shapeList: Tetris.ShapeList,
         shapes: 20,
-        generations: 125,
-        pc: 0.95,
-        pm: 0.05,
+        generations: 500,
+        crossover: {
+            swap: 0.50,
+            uniform: {
+                func: TetrisGA.uniformCrossover,
+                pcx: 0.50,
+                pcr: 0.90
+            },
+            nPoint: {
+                func: TetrisGA.nPointCrossover,
+                pcx: 0.90,
+                pcr: 0.40,
+                n: 2
+            }
+        },
+        mutation: {
+            swap: 0.50,
+            randomReset: {
+                func: TetrisGA.mutationRandomReset,
+                pmx: 0.20,
+                pmr: 0.10
+            },
+            creep: {
+                func: TetrisGA.mutationCreep,
+                range: {
+                    min: -2,
+                    max: 2
+                },
+                pmx: 0.20,
+                pmr: 0.10
+            },
+        },
         workers: {
             script: "static/js/worker.js",
             num: 8
@@ -105,6 +124,7 @@
     var jobsCompleted = 0;
     var currentGeneration = 0;
     var bestFitness = 0;
+    var globalBestGenotype = null;
     var bestGenotype = null;
     var sumFitness = 0;
 
@@ -161,6 +181,11 @@
             sumFitness = 0;
             currentGeneration++;
 
+            // Keep track of best genotype. Elitism.
+            if (globalBestGenotype == null || bestGenotype.fitness >= globalBestGenotype.fitness) {
+                globalBestGenotype = TetrisGA.cloneGenotype(bestGenotype);
+            }
+
             // Simulate the next generation if there are more to do.
             //
             // 1. Select parents
@@ -170,8 +195,28 @@
             // 5. Repeat.
             if (currentGeneration < settings.generations) {
                 var parents = TetrisGA.tournamentSelection(genotypes);
-                var children = TetrisGA.uniformCrossover(parents, settings.pc);
-                var mutations = TetrisGA.mutationRandomReset(children, settings.pm);
+                if (globalBestGenotype != null) {
+                    parents.pop();
+                    parents.push(TetrisGA.cloneGenotype(globalBestGenotype));
+                }
+                var children = null;
+                if (Math.random() > settings.crossover.swap) {
+                    var crossover = settings.crossover.uniform;
+                    children = crossover.func(parents, crossover.pcx, crossover.pcr);
+                } else {
+                    var crossover = settings.crossover.nPoint;
+                    children = crossover.func(parents, crossover.n, crossover.pcx, crossover.pcr);
+                }
+
+                var mutations = null;
+                if (Math.random() > settings.mutation.swap) {
+                    var mutator = settings.mutation.randomReset;
+                    mutations = mutator.func(children, mutator.pmx, mutator.pmr);
+                } else {
+                    var mutator = settings.mutation.creep;
+                    mutations = mutator.func(children, mutator.range, mutator.pmx, mutator.pmr);
+                }
+
                 genotypes = mutations;
                 for (var i = 0; i < genotypes.length; i++) {
                     workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
@@ -180,5 +225,5 @@
                 workerPool.terminateAll();
             }
         }
-    }*/
+    }
 })();
