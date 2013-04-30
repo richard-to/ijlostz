@@ -296,23 +296,23 @@
         }
         return children;
     };
-    TetrisGA.crossoverNPoint = crossoverNPoint;
+    TetrisGA.nPointCrossover = nPointCrossover;
 
     // Mutation using random reset algorithm for integers.
     //
     // Go through each allele and randomly pick a new value if within
     // mutation probability range
-    var mutationRandomReset = function(genotypes, pm) {
+    var mutationRandomReset = function(genotypes, pmx, pmr) {
         var mutations = [];
         for (var i = 0; i < genotypes.length; i++) {
             mutations.push(cloneGenotype(genotypes[i]));
         }
-        for (var i = 0; i < genotypes.length; i++) {
-            for (var g = 0; g < genotypes[i].xPos.length; g++) {
-                if (Math.random() < pm) {
+        for (var i = 0; i < mutations.length; i++) {
+            for (var g = 0; g < mutations[i].xPos.length; g++) {
+                if (Math.random() < pmx) {
                    mutations[i].xPos[g] = randXPos();
                 }
-                if (Math.random() < pm) {
+                if (Math.random() < pmr) {
                     mutations[i].rotation[g] = randRotation();
                 }
             }
