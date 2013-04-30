@@ -256,24 +256,27 @@
     // Crossover allelele at N randomly selected points.
     // Number of genotypes must be an even number. Currently
     // does not handle that case yet.
-    //
-    // TODO: New crossover points should be chosen for each pair.
     var crossoverNPoint = function(genotypes, n, pc) {
+    var nPointCrossover = function(genotypes, n, pcx, pcr) {
         var children = [];
         var length = genotypes.length / 2;
-        var crossPoints = [];
-        for (i = 0; i < n; i++) {
-            crossPoints.push(_.random(1, 8));
-        }
-        crossPoints = _.sortBy(
-            crossPoints, function(num){ return num });
-        crossPoints = _.uniq(crossPoints);
+
         for (var i = 0; i < length; i++) {
+
             var index = i * 2;
             var index2 = index + 1;
             var p1 = cloneGenotype(genotypes[index]);
             var p2 = cloneGenotype(genotypes[index2]);
-            if (Math.random() < pc) {
+            if (Math.random() < pcx) {
+
+                var crossPoints = [];
+                _(n).times(function(n) {
+                    crossPoints.push(_.random(1, 8));
+                });
+                crossPoints = _.sortBy(
+                    crossPoints, function(num){ return num });
+                crossPoints = _.uniq(crossPoints);
+
                 var cIndex = 0;
                 var swap = false;
 
