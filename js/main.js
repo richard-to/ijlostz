@@ -6,27 +6,28 @@
         shapeList: Tetris.ShapeList,
         shapes: 20,
         generations: 500,
-        tournamentSize: 5,
+        tournamentSize: 15,
+        reflexSpeed: 200,
         crossover: {
-            swap: 0.15,
+            swap: 0.50,
             uniform: {
                 func: TetrisGA.uniformCrossover,
-                pcx: 0.70,
+                pcx: 0.90,
                 pcr: 0.90
             },
             nPoint: {
                 func: TetrisGA.nPointCrossover,
                 pcx: 0.90,
-                pcr: 0.70,
+                pcr: 0.90,
                 n: 2
             }
         },
         mutation: {
-            swap: 0.80,
+            swap: 0.60,
             randomReset: {
                 func: TetrisGA.mutationRandomReset,
-                pmx: 0.15,
-                pmr: 0.35
+                pmx: 0.40,
+                pmr: 0.40
             },
             creep: {
                 func: TetrisGA.mutationCreep,
@@ -34,8 +35,8 @@
                     min: -2,
                     max: 2
                 },
-                pmx: 0.35,
-                pmr: 0.15
+                pmx: 0.40,
+                pmr: 0.40
             },
         },
         workers: {
@@ -47,6 +48,7 @@
             cpuCanvas: "cpu-board",
         },
         selector: {
+            replayButton: '.replay-button',
             playerScore: ".player-game-container .score",
             playerBest: ".player-game-container .best-score",
             cpuScore: ".cpu-game-container .score",
@@ -116,18 +118,38 @@
         cpuTetris = null;
     }
 
-    // Run Tetris GA simulation using Worker pool.
-    var workerPool = new TetrisGA.WorkerPool(settings.workers.script, settings.workers.num);
-    for (var i = 0; i < genotypes.length; i++) {
-        workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
-    }
-
     var jobsCompleted = 0;
     var currentGeneration = 0;
     var bestFitness = 0;
     var globalBestGenotype = null;
     var bestGenotype = null;
     var sumFitness = 0;
+
+    $(settings.selector.replayButton).click(function(e){
+        if (cpuTetris == null) {
+            $(settings.selector.cpuScore).text(0);
+            var converter = new TetrisGA.GenotypeToMoveConverter();
+            var cpuMoves = converter.convert(globalBestGenotype, shapes);
+            var cpuShapeBag = new TetrisGA.MockGenerator(shapes.slice());
+
+            cpuTetris = new Tetris.Game(
+                new Tetris.CanvasView(cpuCanvas),
+                cpuShapeBag,
+                {
+                    keysEnabled: false,
+                    onGameEnd: onCpuGameEnd,
+                    onScoreUpdated: onCpuScoreUpdated
+                });
+            var player = new TetrisGA.ComputerPlayer(cpuTetris, cpuMoves, settings.reflexSpeed);
+            player.play();
+        }
+    });
+
+    // Run Tetris GA simulation using Worker pool.
+    var workerPool = new TetrisGA.WorkerPool(settings.workers.script, settings.workers.num);
+    for (var i = 0; i < genotypes.length; i++) {
+        workerPool.runJob({genotype: genotypes[i], shapes: shapes}, onJobCompleted);
+    }
 
     // Callback for when web worker jobs completed
     // Returns a genotype with simulated fitness value.
@@ -154,18 +176,18 @@
             if (cpuTetris == null) {
                 $(settings.selector.cpuScore).text(0);
                 var converter = new TetrisGA.GenotypeToMoveConverter();
-                var moves2 = converter.convert(bestGenotype, shapes);
-                var shapeBag2 = new TetrisGA.MockGenerator(shapes.slice());
+                var cpuMoves = converter.convert(bestGenotype, shapes);
+                var cpuShapeBag = new TetrisGA.MockGenerator(shapes.slice());
 
                 cpuTetris = new Tetris.Game(
                     new Tetris.CanvasView(cpuCanvas),
-                    shapeBag2,
+                    cpuShapeBag,
                     {
                         keysEnabled: false,
                         onGameEnd: onCpuGameEnd,
                         onScoreUpdated: onCpuScoreUpdated
                     });
-                var player = new TetrisGA.ComputerPlayer(cpuTetris, moves2, null)
+                var player = new TetrisGA.ComputerPlayer(cpuTetris, cpuMoves);
                 player.play();
             }
 
@@ -175,7 +197,7 @@
             // Display results to UI.
             var li = $("<li>");
             li.text(bestFitness + " (" + avgScore.toFixed(2) + ")");
-            $(settings.selector.resultList).append(li);
+            $(settings.selector.resultList).prepend(li);
 
             jobsCompleted = 0;
             bestFitness = 0;
@@ -224,6 +246,7 @@
                 }
             } else {
                 workerPool.terminateAll();
+                $(settings.selector.replayButton).show();
             }
         }
     }
