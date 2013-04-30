@@ -256,7 +256,6 @@
     // Crossover allelele at N randomly selected points.
     // Number of genotypes must be an even number. Currently
     // does not handle that case yet.
-    var crossoverNPoint = function(genotypes, n, pc) {
     var nPointCrossover = function(genotypes, n, pcx, pcr) {
         var children = [];
         var length = genotypes.length / 2;
@@ -290,11 +289,37 @@
                     }
                     if (swap) {
                         var tempX = p1.xPos[g];
-                        var tempRot = p1.rotation[g];
                         p1.xPos[g] = p2.xPos[g];
-                        p1.rotation[g] = p2.rotation[g];
                         p2.xPos[g] = tempX;
-                        p2.rotation[g] = tempRot;
+                    }
+                }
+            }
+
+            if (Math.random() < pcr) {
+
+                var crossPoints = [];
+                _(n).times(function(n) {
+                    crossPoints.push(_.random(1, 8));
+                });
+                crossPoints = _.sortBy(
+                    crossPoints, function(num){ return num });
+                crossPoints = _.uniq(crossPoints);
+
+                var cIndex = 0;
+                var swap = false;
+
+                for (var g = 0; g < p1.rotation.length; g++) {
+                    if (cIndex != null && crossPoints[cIndex] == g) {
+                        cIndex++;
+                        if (cIndex < crossPoints.length) {
+                            cIndex = null;
+                        }
+                        swap = swap === false ? true : false;
+                    }
+                    if (swap) {
+                        var tempRotation = p1.rotation[g];
+                        p1.rotation[g] = p2.rotation[g];
+                        p2.rotation[g] = tempRotation;
                     }
                 }
             }
