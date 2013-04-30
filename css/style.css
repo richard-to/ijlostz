@@ -45,8 +45,37 @@ canvas {
 }
 
 .results-wrap {
-    height: 395px;
+    height: 350px;
     overflow-y: scroll;
+
+}
+
+.results-list {
+    padding-left: 40px;
+}
+
+.results-list li {
+    padding: 5px 10px;
+}
+
+.replay-button {
+    background: #fff;
+    border: None;
+    cursor: pointer;
+    display: block;
+    font-size: 18px;
+    font-family: monospace;
+    padding: 5px 10px;
+    width: 100%;
+}
+
+.replay-button:hover {
+    background: teal;
+    color: #fff;
+}
+
+.hidden {
+    display: none;
 }
 
 .clear {
