@@ -61,81 +61,110 @@
 
     var Control = Tetris.Control;
 
-    // Function that converts genotype into a sequence of
-    // moves for the computer player.
+    // Class that converts a genotype to a sequence of
+    // playable moves.
     //
-    // TODO: Clean up function.
-    var convertGenotypeToMoves = function(genotype, shapes) {
-        var moves = [];
-        var xPos = genotype.xPos;
-        var rotation = genotype.rotation;
-        var length = xPos.length;
-        for (var i = 0; i < length; i++) {
-            if (rotation[i] == 1) {
+    // Additionally there is a cache to avoid redundant
+    // calculations.
+    var GenotypeToMoveConverter = function() {
+        var cache = {};
+
+        // Gets rotated version of shape
+        this.getRotatedShape = function(shape, rotation) {
+            var shapeIndex = rotation % shape.shape.length;
+            return shape.shape[shapeIndex];
+        };
+
+        // Converts rotation allele to rotation key sequence
+        this.convertRotation = function(moves, rotation) {
+            if (rotation === 1) {
                 moves.push(Control.ROTATE_RIGHT);
-            } else if (rotation[i] == 2) {
+            } else if (rotation === 2) {
                 moves.push(Control.ROTATE_RIGHT);
                 moves.push(Control.ROTATE_RIGHT);
-            } else if (rotation[i] == 3) {
+            } else if (rotation === 3) {
                 moves.push(Control.ROTATE_LEFT);
             }
-            if (xPos[i] < shapes[i].start.x) {
-                var shapeIndex = rotation[i] % shapes[i].shape.length;
-                var shape = shapes[i].shape[shapeIndex];
-                var moves1 = shapes[i].start.x;
-                while(moves1 > xPos[i]) {
-                    moves.push(Control.LEFT);
-                    moves1--;
-                }
+            return moves;
+        };
 
-                var xSpace = 0;
-                var found = false;
-                for (var x = 0; x < shape[0].length; x++) {
-                    for (var y = 0; y < shape.length; y++) {
-                        if (shape[y][x] > 0) {
-                            xSpace = x;
-                            found = true;
-                            break;
-                        }
+        // Find the left index of tetromino in shape matrix
+        this.findLeftPos = function(shape) {
+            var width = shape[0].length;
+            var height = shape.length;
+            for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
+                    if (shape[y][x] > 0) {
+                        return x;
                     }
-                    if (found)
-                        break;
-                }
-
-                while (xSpace > 0) {
-                    moves.push(Control.LEFT);
-                    xSpace--;
-                }
-            } else if (xPos[i] > shapes[i].start.x) {
-                var shapeIndex = rotation[i] % shapes[i].shape.length;
-                var shape = shapes[i].shape[shapeIndex];
-                var moves1 = shapes[i].start.x;
-
-                var xSpace = shape[0].length - 1;
-                var found = false;
-                for (var x = shape[0].length - 1; x >= 0; x--) {
-                    for (var y = 0; y < shape.length; y++) {
-                        if (shape[y][x] > 0) {
-                            xSpace = shape[0].length - x;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found)
-                        break;
-                }
-
-                var padding = shape[0].length - xSpace;
-                while (moves1 < xPos[i] - padding) {
-                    moves.push(Control.RIGHT);
-                    moves1++;
                 }
             }
-            moves.push(Control.HARDDROP);
-        }
-        return moves;
-    };
-    TetrisGA.convertGenotypeToMoves = convertGenotypeToMoves;
+            throw new Error();
+        };
+
+        // Find the right index of tetromino in shape matrix
+        this.findRightPos = function(shape) {
+            var xStart = shape[0].length - 1;
+            var height = shape.length;
+            for (var x = xStart; x > 0; --x) {
+                for (var y = 0; y < height; ++y) {
+                    if (shape[y][x] > 0) {
+                        return x;
+                    }
+                }
+            }
+            throw new Error();
+        };
+
+        //Calculate moves to get to specified x pos.
+        this.convertXPos = function(moves, shape, xStart, xPos) {
+            var dim = {
+                left: this.findLeftPos(shape),
+                right: this.findRightPos(shape)
+            };
+
+            var startX = xStart + dim.left;
+
+            if (xPos < startX) {
+                var curX = startX;
+                while (curX > xPos) {
+                    moves.push(Control.LEFT);
+                    curX--;
+                }
+            } else if (xPos > startX) {
+                var distStartX = xPos - startX;
+                var distEndX = xPos + dim.right - dim.left;
+                if (distEndX >= Constraints.WIDTH) {
+                    distStartX -= (distEndX - Constraints.WIDTH + 1);
+                }
+                var distCur = 0;
+                while (distCur < distStartX) {
+                    moves.push(Control.RIGHT);
+                    distCur++;
+                }
+            }
+            return moves;
+        };
+
+        // Converts genotype to sequence of moves.
+        this.convert = function(genotype, shapes) {
+            var moves = [];
+
+            var rotation = genotype.rotation;
+            var xPos = genotype.xPos;
+            var length = shapes.length;
+
+            var self = this;
+            _(length).times(function(i) {
+                moves = self.convertRotation(moves, rotation[i]);
+                var shape = self.getRotatedShape(shapes[i], rotation[i]);
+                moves = self.convertXPos(moves, shape, shapes[i].start.x, xPos[i]);
+                moves.push(Control.HARDDROP);
+            });
+            return moves;
+        };
+    }
+    TetrisGA.GenotypeToMoveConverter = GenotypeToMoveConverter;
 
     // Initializes random sequence of shapes
     var initializeShapes = function(tetrominoCount, generator) {
@@ -386,7 +415,8 @@
     // score.
     var simulateFitness = function(genotype, shapes, reflexSpeed, callback) {
         var self = this;
-        var moves = convertGenotypeToMoves(genotype, shapes);
+        var converter = new GenotypeToMoveConverter();
+        var moves = converter.convert(genotype, shapes);
         var shapeBag = new MockGenerator(_.clone(shapes));
         var tetris = new Tetris.Game(
             new NullView(),
