@@ -6,26 +6,27 @@
         shapeList: Tetris.ShapeList,
         shapes: 20,
         generations: 500,
+        tournamentSize: 5,
         crossover: {
-            swap: 0.50,
+            swap: 0.15,
             uniform: {
                 func: TetrisGA.uniformCrossover,
-                pcx: 0.50,
+                pcx: 0.70,
                 pcr: 0.90
             },
             nPoint: {
                 func: TetrisGA.nPointCrossover,
                 pcx: 0.90,
-                pcr: 0.40,
+                pcr: 0.70,
                 n: 2
             }
         },
         mutation: {
-            swap: 0.50,
+            swap: 0.80,
             randomReset: {
                 func: TetrisGA.mutationRandomReset,
-                pmx: 0.20,
-                pmr: 0.10
+                pmx: 0.15,
+                pmr: 0.35
             },
             creep: {
                 func: TetrisGA.mutationCreep,
@@ -33,8 +34,8 @@
                     min: -2,
                     max: 2
                 },
-                pmx: 0.20,
-                pmr: 0.10
+                pmx: 0.35,
+                pmr: 0.15
             },
         },
         workers: {
@@ -194,7 +195,7 @@
             // 4. Simulate fitness values of new generation
             // 5. Repeat.
             if (currentGeneration < settings.generations) {
-                var parents = TetrisGA.tournamentSelection(genotypes);
+                var parents = TetrisGA.tournamentSelection(genotypes, settings.tournamentSize);
                 if (globalBestGenotype != null) {
                     parents.pop();
                     parents.push(TetrisGA.cloneGenotype(globalBestGenotype));
