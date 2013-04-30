@@ -205,13 +205,15 @@
         while (parents.length < length) {
             var best = null;
             var challengers = [];
-            _(k).times(challengers.push(_.random(max)));
+            _(k).times(function(n) {
+                challengers.push(genotypes[_.random(max)])
+            });
             for (var i = 0; i < k; i++) {
                 if (best == null || challengers[i].fitness > best.fitness) {
                     best = challengers[i];
                 }
             }
-            parents.push(best);
+            parents.push(cloneGenotype(best));
         }
         return parents;
     };
