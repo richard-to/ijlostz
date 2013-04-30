@@ -5,12 +5,12 @@
     var settings = {
         population: 100,
         shapeList: Tetris.ShapeList,
-        shapes: 10,
+        shapes: 20,
         generations: 500,
-        tournamentSize: 20,
+        tournamentSize: 10,
         reflexSpeed: 200,
         crossover: {
-            swap: 0.0,
+            swap: 0.1,
             uniform: {
                 func: TetrisGA.uniformCrossover,
                 pcx: 0.65,
@@ -24,11 +24,11 @@
             }
         },
         mutation: {
-            swap: 1.0,
+            swap: 0.75,
             randomReset: {
                 func: TetrisGA.mutationRandomReset,
                 pmx: 0.10,
-                pmr: 0.30
+                pmr: 0.40
             },
             creep: {
                 func: TetrisGA.mutationCreep,
@@ -36,8 +36,8 @@
                     min: -2,
                     max: 2
                 },
-                pmx: 0.30,
-                pmr: 0.10
+                pmx: 0.35,
+                pmr: 0.15
             },
         },
         workers: {
